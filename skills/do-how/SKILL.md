@@ -104,7 +104,7 @@ Run the full explain flow above (Steps 1-4). You must understand the architectur
 
 ### Step 2. Spawn Critics
 
-After the explanation is complete, spawn critics in one `task` call with one `tasks` entry per critic, each `agent: "interrogate-reviewer"` (readonly adversarial). Distinct label in the task text (Critic A/B/C). Do not pass `readonly` or `model`. N parallel models is not available (one agent definition, one role); diversity is prompt/label only unless the user changes that agent's `model` in `/agents`.
+After the explanation is complete, spawn critics in one `task` call with one `tasks` entry per critic seat: `agent: "interrogate-reviewer-a"`, `"interrogate-reviewer-b"`, `"interrogate-reviewer-c"` (readonly adversarial, each on its own model role). Put the label in the task text (Critic A/B/C). Do not pass `readonly` or `model`.
 
 Read `references/critic-prompt.md` for the prompt template. Each critic gets:
 1. The explanation from Step 1 (so they don't re-explore)

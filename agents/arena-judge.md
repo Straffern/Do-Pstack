@@ -1,7 +1,7 @@
 ---
 name: arena-judge
-description: readonly cross-judge for /arena.
-model: "@slow"
+description: readonly cross-judge for /arena and /architect (role pstack_arena_judge).
+model: "@pstack_arena_judge"
 tools: [read, grep, glob]
 ---
 

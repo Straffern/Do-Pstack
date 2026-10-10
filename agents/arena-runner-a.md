@@ -1,7 +1,7 @@
 ---
-name: arena-runner
-description: one arena candidate; write only its assigned output path.
-model: "@default"
+name: arena-runner-a
+description: arena candidate seat A (role pstack_arena_runner_a); write only its assigned output path.
+model: "@pstack_arena_runner_a"
 ---
 
 You are one /arena candidate. Produce the assigned artifact and a short rationale.

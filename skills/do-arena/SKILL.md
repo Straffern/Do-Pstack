@@ -25,12 +25,12 @@ The N candidates will receive the same prompt, so the prompt is the contract. Ge
 
 1. State the artifact each candidate is producing.
 2. Derive the rubric. State what success looks like for *this* task, then turn it into 3-6 concrete gradeable criteria. Concrete: `Adds a --dry-run flag that skips writes`. Vague: `code is correct`. The rubric is the picker's tool in Phase D; candidates only see the task.
-3. Pick N runners. Fan out with one `task` call and N `tasks` entries, each `agent: "arena-runner"`. N parallel models is not available (one agent definition, one role); diversity is prompt/path only unless the user changes that agent's `model` in `/agents`. Spawn more entries when the arena covers multiple design directions. Do not read `~/.cursor/rules/pstack-models.mdc` or `~/.omp/agent/pstack/models.json` for routing.
+3. Pick N runners from the seats `arena-runner-a`, `arena-runner-b`, `arena-runner-c`. Each seat runs on its own model role (`pstack_arena_runner_a/b/c` in `/model` → Roles), so the default fan-out is all three seats, one candidate each. Model diversity is the point; don't put two candidates on one seat unless the arena covers more design directions than seats. A caller (e.g. **architect**) may name its own runner seats; use those instead.
 4. Assign output paths. Each candidate writes to its own location (a git worktree where possible, otherwise `/tmp/arena-<slug>/candidate-<n>/`). N candidates writing to the same path is shared mutable state and fails the the **separate-before-serializing-shared-state** principle skill test.
 
 ## Phase B: Fan out
 
-Spawn all N candidates in one `task` call with N `tasks` entries, each `agent: "arena-runner"`. Each task text gets the shared brief, the path to the shared grounding, its own output path, and instructions to produce both the artifact and a short rationale. Do not pass `model`, `run_in_background`, or `subagent_type`.
+Spawn all N candidates in one `task` call with N `tasks` entries, one per seat (`agent: "arena-runner-a"`, `"arena-runner-b"`, `"arena-runner-c"`, or the caller's seats). Each task text gets the shared brief, the path to the shared grounding, its own output path, and instructions to produce both the artifact and a short rationale. Do not pass `model`, `run_in_background`, or `subagent_type`. Record which seat produced which candidate path; the judge sees path labels only.
 
 The rationale is mandatory. Without it, the parent cannot tell whether a candidate's structure is principled or accidental, which makes Phase E grafting unreliable. Each rationale names the alternatives the candidate considered and what it rejected.
 
@@ -38,7 +38,7 @@ If a candidate fails to produce output, proceed with N-1 and note the dropout in
 
 ## Phase C: Cross-judge
 
-After all Phase B candidates complete, call `task` with `tasks: [{ agent: "arena-judge", task: "<rubric + candidate paths>" }]`. Do not pass `model` or `readonly`. The judge sees the rubric and the candidates by path label, scores each criterion, and recommends a base with rationale. It runs in parallel with the parent's reading in Phase D, not with the candidates themselves. Spawning while candidates are still writing means the judge sees partial or empty outputs and reports them as dropouts. One judge agent, one role; do not read `pstack-models.mdc` for a cross-judge pool.
+After all Phase B candidates complete, call `task` with `tasks: [{ agent: "arena-judge", task: "<rubric + candidate paths>" }]`. Do not pass `model` or `readonly`. The judge runs on role `pstack_arena_judge`; keep that on a model family the runners don't dominate. The judge sees the rubric and the candidates by path label, scores each criterion, and recommends a base with rationale. It runs in parallel with the parent's reading in Phase D, not with the candidates themselves. Spawning while candidates are still writing means the judge sees partial or empty outputs and reports them as dropouts.
 
 ## Phase D: Pick a base
 

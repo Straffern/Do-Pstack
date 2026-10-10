@@ -86,7 +86,7 @@ Read the leaf skill in full for any principle you apply. Each entry names when i
 
 ## Subagents
 
-Spawn via omp `task({ context, tasks: [{ agent, task }] })`. Named agents: poteto-agent, comment-sicko, how-explorer, how-explainer, arena-runner, arena-judge, swarm-worker, interrogate-reviewer. No `model` field on `task`. Use `agent: "poteto-agent"` for playbook code-writing delegates and ad-hoc helpers. Routed workflow skills (`how`, `why`, `interrogate`, `reflect`, `swarm`, `arena`) name their own agent; respect what the skill prescribes, don't override to `poteto-agent`.
+Spawn via omp `task({ context, tasks: [{ agent, task }] })`. Named agents: poteto-agent, comment-sicko, how-explorer, how-explainer, arena-runner-a/b/c, architect-runner-a/b/c, arena-judge, swarm-worker, interrogate-reviewer-a/b/c. No `model` field on `task`; panel seats carry their own model roles. Use `agent: "poteto-agent"` for playbook code-writing delegates and ad-hoc helpers. Routed workflow skills (`how`, `why`, `interrogate`, `reflect`, `swarm`, `arena`, `architect`) name their own agents; respect what the skill prescribes, don't override to `poteto-agent`.
 
 You own every subagent's work. Review the diff and write your own summary, don't pass through what it said. Interrupt-chained resumes silently drop directives, so fire a fresh subagent with consolidated scope rather than trusting a "done" summary. A second opinion is the same prompt against a different model. Agreement is high-signal.
 

@@ -33,9 +33,9 @@ Write one clear paragraph. Reviewers challenge whether the work achieves the int
 
 ## Step 3, Spawn Reviewers
 
-Launch all reviewers in one `task` call with one `tasks` entry per reviewer, each `agent: "interrogate-reviewer"`. Put a distinct label in the task text (Reviewer A/B/C). Do not pass `model`, `readonly`, or `subagent_type`. Do not read `~/.cursor/rules/pstack-models.mdc`.
+Launch all reviewers in one `task` call with one `tasks` entry per seat: `agent: "interrogate-reviewer-a"`, `"interrogate-reviewer-b"`, `"interrogate-reviewer-c"`. Put the seat label in the task text (Reviewer A/B/C). Do not pass `model`, `readonly`, or `subagent_type`.
 
-One agent file, one role (`@slow`). N parallel models is not available; diversity is the Reviewer A/B/C label and prompt only unless the user changes that agent's `model` in `/agents`.
+Each seat runs on its own model role (`pstack_interrogate_reviewer_a/b/c` in `/model` → Roles). That is the "configured model" per reviewer. Attribute findings by seat, and name the seat's model in the synthesis when you know it.
 
 Read `references/reviewer-prompt.md` and fill in the template with:
 1. The stated intent

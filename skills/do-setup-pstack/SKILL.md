@@ -20,10 +20,15 @@ These files live in this plugin's `agents/` directory. Change a mapping with `/a
 | arena-runner-a / -b / -c | `@pstack_arena_runner_a` / `_b` / `_c` | /arena candidate seats (each writes only its assigned path) |
 | architect-runner-a / -b / -c | `@pstack_architect_runner_a` / `_b` / `_c` | /architect design candidate seats |
 | arena-judge | `@pstack_arena_judge` | /arena and /architect readonly cross-judge |
-| interrogate-reviewer-a / -b / -c | `@pstack_interrogate_reviewer_a` / `_b` / `_c` | /interrogate reviewers and /how critics |
+| interrogate-reviewer-a / -b / -c | `@pstack_interrogate_reviewer_a` / `_b` / `_c` | /interrogate reviewers, /how critics, cross-family second opinions and verifiers |
 | swarm-worker | `@default` | /swarm slice or race arm |
+| bug-fix-worker | `@pstack_bug-fix` | Bug fix playbook implementation delegate |
+| feature-worker | `@pstack_feature` | Feature playbook implementation delegate |
+| perf-issue-worker | `@pstack_perf_issue` | Perf issue playbook implementation delegate |
+| hillclimb-worker | `@pstack_hillclimb` | Hillclimb playbook implementation delegate |
+| refactoring-worker | `@pstack_refactoring` | Refactoring playbook implementation delegate |
 
-The `pstack_*` roles exist so each panel seat can run a different model. They are custom roles: they appear in `/model` → Roles once set in `modelRoles` (`pstack_arena_runner_a: <provider>/<model>:<thinking>`). An unset `pstack_*` role falls back to the task/session model, which silently collapses the panel onto one model. Point the a/b/c seats of a panel at different models.
+The `pstack_*` roles exist so each panel seat can run a different model. They are custom roles: they appear in `/model` → Roles once set in `modelRoles` (`pstack_arena_runner_a: <provider>/<model>:<thinking>`). An unset `pstack_*` role falls back to the task/session model, which silently collapses the panel onto one model. Point the a/b/c seats of a panel at different models. The interrogate seats double as cross-family second opinions and verifiers, so keep at least one on a family the workers don't use.
 
 ## Steps
 

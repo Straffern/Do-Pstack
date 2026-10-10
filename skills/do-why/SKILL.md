@@ -115,7 +115,7 @@ Aim for a complete **coverage map**, not a minimal one. A null result from an is
 
 Launch all matching investigators in a single message so they run concurrently. One investigator per category lets each specialize in one tool's query vocabulary and result shape. Don't ask one agent to cover multiple MCPs.
 
-Spawn investigators with one `task` call and one `tasks` entry per category, each `agent: "poteto-agent"` (investigators need MCP; do not use how-explorer, whose tool grant is read/grep/glob only). Distinct category in the task text. Do not pass `model`, `readonly`, or `subagent_type`. Investigators still shouldn't write anything. That's a posture, not a sandbox.
+Spawn investigators with one `task` call and one `tasks` entry per category, each `agent: "why-investigator"` (investigators need MCP; do not use how-explorer, whose tool grant is read/grep/glob only). Distinct category in the task text. Do not pass `model`, `readonly`, or `subagent_type`. Investigators still shouldn't write anything. That's a posture, not a sandbox.
 
 Each investigator gets:
 1. The base prompt from `references/investigator-prompt.md`
@@ -157,7 +157,7 @@ If your scope assessment suggests a single-commit trivial target where the PR de
 
 ## Step 4. Synthesize
 
-Call `task` with `tasks: [{ agent: "poteto-agent", task: "<synthesizer brief>" }]`. Do not pass `model` or `readonly`. The synthesizer's quality check spot-verifies citations, which can require MCP access.
+Call `task` with `tasks: [{ agent: "why-synthesizer", task: "<synthesizer brief>" }]`. Do not pass `model` or `readonly`. The synthesizer's quality check spot-verifies citations, which can require MCP access.
 
 The synthesizer gets:
 1. The investigator findings, including any null results and any categories skipped with justification

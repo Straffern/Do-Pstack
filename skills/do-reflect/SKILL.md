@@ -34,7 +34,7 @@ For each candidate, read the first JSONL line and check that `message.content[0]
 
 ### 2. Spawn three reviewers in parallel
 
-One `task` call with three `tasks` entries, each `agent: "poteto-agent"` (reviewers need MCP; do not pass `model` or `readonly`). Distinct lens in the task text (Judgment / Tooling / Divergent). The prompt forbids file writes; the parent applies edits.
+One `task` call with three `tasks` entries: `agent: "reflect-judgment"` for the Judgment and Divergent lenses, `agent: "reflect-tooling"` for the Tooling lens (reviewers need MCP; do not pass `model` or `readonly`). Distinct lens in the task text (Judgment / Tooling / Divergent). The prompt forbids file writes; the parent applies edits.
 
 | Lens | Prompt template |
 |---|---|
@@ -46,7 +46,7 @@ Pass each template verbatim, substituting the transcript path or digest where ma
 
 ### 3. Synthesize
 
-One `task` call with `tasks: [{ agent: "poteto-agent", task: "<synthesizer brief>" }]`. Do not pass `model` or `readonly`. The synthesizer's quality check includes spot-verifying citations, which can require MCP access. Use `references/synthesizer.md` verbatim, with each reviewer's full output inlined where marked. The synthesizer returns a structured Accepted / Rejected / Backlog list.
+One `task` call with `tasks: [{ agent: "reflect-judgment", task: "<synthesizer brief>" }]`. Do not pass `model` or `readonly`. The synthesizer's quality check includes spot-verifying citations, which can require MCP access. Use `references/synthesizer.md` verbatim, with each reviewer's full output inlined where marked. The synthesizer returns a structured Accepted / Rejected / Backlog list.
 
 ### 4. Structural enforcement check
 

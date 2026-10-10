@@ -22,6 +22,10 @@ These files live in this plugin's `agents/` directory. Change a mapping with `/a
 | arena-judge | `@pstack_arena_judge` | /arena and /architect readonly cross-judge |
 | interrogate-reviewer-a / -b / -c | `@pstack_interrogate_reviewer_a` / `_b` / `_c` | /interrogate reviewers, /how critics, cross-family second opinions and verifiers |
 | swarm-worker | `@default` | /swarm slice or race arm |
+| why-investigator | `@pstack_why_investigator` | /why per-category investigators |
+| why-synthesizer | `@pstack_why_synthesizer` | /why synthesis |
+| reflect-judgment | `@pstack_reflect_judgment` | /reflect Judgment and Divergent lenses and synthesizer |
+| reflect-tooling | `@pstack_reflect_tooling` | /reflect Tooling lens |
 | bug-fix-worker | `@pstack_bug-fix` | Bug fix playbook implementation delegate |
 | feature-worker | `@pstack_feature` | Feature playbook implementation delegate |
 | perf-issue-worker | `@pstack_perf_issue` | Perf issue playbook implementation delegate |

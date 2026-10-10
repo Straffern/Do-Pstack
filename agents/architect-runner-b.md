@@ -1,6 +1,6 @@
 ---
 name: architect-runner-b
-description: architect design candidate seat B (role pstack_architect_runner_b); write only its assigned output path.
+description: architect design candidate seat B; write only its assigned output path.
 model: "@pstack_architect_runner_b"
 ---
 

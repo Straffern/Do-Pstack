@@ -1,6 +1,6 @@
 ---
 name: arena-runner-a
-description: arena candidate seat A (role pstack_arena_runner_a); write only its assigned output path.
+description: arena candidate seat A; write only its assigned output path.
 model: "@pstack_arena_runner_a"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: interrogate-reviewer-a
-description: readonly adversarial reviewer seat A for /interrogate and /how critics (role pstack_interrogate_reviewer_a).
+description: readonly adversarial reviewer seat A for /interrogate and /how critics.
 model: "@pstack_interrogate_reviewer_a"
 tools: [read, grep, glob]
 ---

@@ -3,7 +3,7 @@ name: perf-issue-worker
 description: implementation delegate for the poteto-mode Perf issue playbook.
 autoload-skills:
   - poteto-mode
-model: "@pstack_perf_issue"
+model: "@task"
 thinking-level: high
 ---
 

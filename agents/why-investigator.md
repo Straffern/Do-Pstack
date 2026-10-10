@@ -3,7 +3,7 @@ name: why-investigator
 description: /why investigator for one evidence category; read-only posture, writes nothing.
 autoload-skills:
   - poteto-mode
-model: "@pstack_why_investigator"
+model: "@default"
 thinking-level: high
 ---
 

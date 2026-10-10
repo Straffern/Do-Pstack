@@ -3,7 +3,7 @@ name: bug-fix-worker
 description: implementation delegate for the poteto-mode Bug fix playbook.
 autoload-skills:
   - poteto-mode
-model: "@pstack_bug_fix"
+model: "@task"
 thinking-level: high
 ---
 

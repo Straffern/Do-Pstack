@@ -3,7 +3,7 @@ name: hillclimb-worker
 description: implementation delegate for the poteto-mode Hillclimb playbook.
 autoload-skills:
   - poteto-mode
-model: "@pstack_hillclimb"
+model: "@task"
 thinking-level: high
 ---
 

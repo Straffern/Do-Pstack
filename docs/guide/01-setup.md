@@ -40,7 +40,7 @@ You should see each plugin agent and the `@role` it uses. Routing lives in `/mod
 
 To change a concrete model for a role, open `/model` then Roles. To put one agent on a different role, open `/agents` and override that agent. New `task` calls pick it up.
 
-Panels (`/arena`, `/architect`, `/interrogate`, `/how` critics) use one agent per seat, each on its own role: `pstack_arena_runner_a/b/c`, `pstack_architect_runner_a/b/c`, `pstack_arena_judge`, `pstack_interrogate_reviewer_a/b/c`. Set them under `modelRoles`, then retune any seat in `/model` → Roles. An unset seat role falls back to the session model, and the panel loses its model diversity.
+Most agents use built-in roles (`smol`, `default`, `task`, `slow`, `advisor`). Panels (`/arena`, `/architect`, `/interrogate`, `/how` critics) run seat A on `slow` and seats B/C on two custom roles, `pstack_panel_b` and `pstack_panel_c`; the arena judge uses `advisor`. Set both custom roles under `modelRoles` on different model families. An unset one falls back to the session model, and the panel loses its model diversity.
 
 On Claude Code the same skill is [`/pstack:do-setup-pstack`](../../skills/do-setup-pstack/SKILL.md).
 

@@ -3,7 +3,7 @@ name: reflect-judgment
 description: /reflect Judgment and Divergent lens reviewer and synthesizer; writes nothing.
 autoload-skills:
   - poteto-mode
-model: "@pstack_reflect_judgment"
+model: "@slow"
 thinking-level: high
 ---
 

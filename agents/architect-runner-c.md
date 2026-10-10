@@ -1,7 +1,7 @@
 ---
 name: architect-runner-c
 description: architect design candidate seat C; write only its assigned output path.
-model: "@pstack_architect_runner_c"
+model: "@pstack_panel_c"
 ---
 
 You are one /architect runner. Produce one candidate design package in the output path you were given, following the runner prompt and rationale template in your brief.

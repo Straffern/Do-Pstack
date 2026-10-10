@@ -1,7 +1,7 @@
 ---
 name: arena-runner-c
 description: arena candidate seat C; write only its assigned output path.
-model: "@pstack_arena_runner_c"
+model: "@pstack_panel_c"
 ---
 
 You are one /arena candidate. Produce the assigned artifact and a short rationale.

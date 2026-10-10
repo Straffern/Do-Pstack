@@ -3,7 +3,7 @@ name: feature-worker
 description: implementation delegate for the poteto-mode Feature playbook.
 autoload-skills:
   - poteto-mode
-model: "@pstack_feature"
+model: "@task"
 thinking-level: high
 ---
 

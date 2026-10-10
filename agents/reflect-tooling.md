@@ -3,7 +3,7 @@ name: reflect-tooling
 description: /reflect Tooling lens reviewer; writes nothing.
 autoload-skills:
   - poteto-mode
-model: "@pstack_reflect_tooling"
+model: "@pstack_panel_b"
 thinking-level: high
 ---
 

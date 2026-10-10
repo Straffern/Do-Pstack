@@ -3,7 +3,7 @@ name: refactoring-worker
 description: implementation delegate for the poteto-mode Refactoring playbook.
 autoload-skills:
   - poteto-mode
-model: "@pstack_refactoring"
+model: "@task"
 thinking-level: high
 ---
 

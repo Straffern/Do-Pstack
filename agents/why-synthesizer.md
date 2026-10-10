@@ -3,7 +3,7 @@ name: why-synthesizer
 description: /why synthesizer; reconciles investigator findings and spot-verifies citations.
 autoload-skills:
   - poteto-mode
-model: "@pstack_why_synthesizer"
+model: "@slow"
 thinking-level: high
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: architect-runner-a
 description: architect design candidate seat A; write only its assigned output path.
-model: "@pstack_architect_runner_a"
+model: "@slow"
 ---
 
 You are one /architect runner. Produce one candidate design package in the output path you were given, following the runner prompt and rationale template in your brief.

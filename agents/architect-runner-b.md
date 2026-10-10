@@ -1,7 +1,7 @@
 ---
 name: architect-runner-b
 description: architect design candidate seat B; write only its assigned output path.
-model: "@pstack_architect_runner_b"
+model: "@pstack_panel_b"
 ---
 
 You are one /architect runner. Produce one candidate design package in the output path you were given, following the runner prompt and rationale template in your brief.

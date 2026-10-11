@@ -1,0 +1,19 @@
+{
+  "name": "pstack",
+  "displayName": "pstack",
+  "version": "0.17.0",
+  "description": "pstack skills, agents, and sticky /poteto-mode. Claude slash skills are /pstack:do-*.",
+  "author": {
+    "name": "Ed Heltzel",
+    "url": "https://github.com/edheltzel"
+  },
+  "homepage": "https://github.com/edheltzel/Do-Pstack",
+  "repository": "https://github.com/edheltzel/Do-Pstack",
+  "license": "MIT",
+  "keywords": [
+    "pstack",
+    "poteto-mode",
+    "skills",
+    "omp"
+  ]
+}

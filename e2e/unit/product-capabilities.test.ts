@@ -123,6 +123,8 @@ describe("original product pack", () => {
     expect(existsSync(join(root, "commands/poteto-mode.md"))).toBe(false);
     expect(existsSync(join(root, ".omp-plugin/marketplace.json"))).toBe(false);
     expect(existsSync(join(root, ".claude-plugin/plugin.json"))).toBe(true);
+    // omp drops agent frontmatter `model` for plugins with only a Claude manifest.
+    expect(existsSync(join(root, ".omp-plugin/plugin.json"))).toBe(true);
     expect(existsSync(join(root, ".claude-plugin/marketplace.json"))).toBe(true);
     expect(existsSync(join(root, ".claude-plugin/skills"))).toBe(false);
     expect(existsSync(join(root, "e2e/unit/static-checks.ts"))).toBe(false);

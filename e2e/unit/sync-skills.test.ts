@@ -30,14 +30,19 @@ function git(cwd: string, ...args: string[]) {
   return spawnSync("git", ["-C", cwd, ...args], { encoding: "utf8" });
 }
 
-function gitVersionRepo(version: string): string {
-  const root = mkdtempSync(join(tmpdir(), "pstack-bump-git-"));
+function writeVersions(root: string, version: string): void {
   write(root, "package.json", JSON.stringify({ name: "pstack", version }, null, 2) + "\n");
   write(root, ".claude-plugin/plugin.json", JSON.stringify({ name: "pstack", version }, null, 2) + "\n");
+  write(root, ".omp-plugin/plugin.json", JSON.stringify({ name: "pstack", version }, null, 2) + "\n");
+}
+
+function gitVersionRepo(version: string): string {
+  const root = mkdtempSync(join(tmpdir(), "pstack-bump-git-"));
+  writeVersions(root, version);
   git(root, "init");
   git(root, "config", "user.email", "dev@example.com");
   git(root, "config", "user.name", "dev");
-  git(root, "add", "package.json", ".claude-plugin/plugin.json");
+  git(root, "add", "package.json", ".claude-plugin/plugin.json", ".omp-plugin/plugin.json");
   git(root, "commit", "-m", `v${version}`);
   return root;
 }
@@ -205,14 +210,9 @@ describe("pstack bump", () => {
     expect(bumpSemver("0.15.0", "major")).toBe("1.0.0");
   });
 
-  it("writes package.json and plugin.json together", () => {
+  it("writes every version manifest together", () => {
     const root = mkdtempSync(join(tmpdir(), "pstack-bump-"));
-    write(root, "package.json", JSON.stringify({ name: "pstack", version: "0.15.0" }, null, 2) + "\n");
-    write(
-      root,
-      ".claude-plugin/plugin.json",
-      JSON.stringify({ name: "pstack", version: "0.15.0" }, null, 2) + "\n",
-    );
+    writeVersions(root, "0.15.0");
     const report = runBump({
       command: "bump",
       kind: "patch",
@@ -222,8 +222,9 @@ describe("pstack bump", () => {
       root,
     });
     expect(report.to).toBe("0.15.1");
-    expect(JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version).toBe("0.15.1");
-    expect(JSON.parse(readFileSync(join(root, ".claude-plugin/plugin.json"), "utf8")).version).toBe("0.15.1");
+    for (const rel of ["package.json", ".claude-plugin/plugin.json", ".omp-plugin/plugin.json"]) {
+      expect(JSON.parse(readFileSync(join(root, rel), "utf8")).version).toBe("0.15.1");
+    }
   });
 
   it("does not write package.json when plugin.json is invalid", () => {
@@ -238,8 +239,7 @@ describe("pstack bump", () => {
 
   it("dry-run writes nothing", () => {
     const root = mkdtempSync(join(tmpdir(), "pstack-bump-dry-"));
-    write(root, "package.json", JSON.stringify({ version: "1.2.3" }, null, 2) + "\n");
-    write(root, ".claude-plugin/plugin.json", JSON.stringify({ version: "1.2.3" }, null, 2) + "\n");
+    writeVersions(root, "1.2.3");
     runBump({ command: "bump", kind: "minor", dryRun: true, tag: false, release: false, root });
     expect(JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version).toBe("1.2.3");
   });
@@ -255,8 +255,7 @@ describe("pstack bump", () => {
 
   it("CLI bump patch --dry-run exits 0", () => {
     const root = mkdtempSync(join(tmpdir(), "pstack-bump-cli-"));
-    write(root, "package.json", JSON.stringify({ version: "0.1.0" }, null, 2) + "\n");
-    write(root, ".claude-plugin/plugin.json", JSON.stringify({ version: "0.1.0" }, null, 2) + "\n");
+    writeVersions(root, "0.1.0");
     const result = spawnSync(process.execPath, [cli, "bump", "patch", "--dry-run", "--root", root], {
       encoding: "utf8",
     });
@@ -267,8 +266,7 @@ describe("pstack bump", () => {
 
   it("refuses kind with --tag so it cannot tag old HEAD", () => {
     const root = mkdtempSync(join(tmpdir(), "pstack-bump-refuse-"));
-    write(root, "package.json", JSON.stringify({ version: "0.15.0" }, null, 2) + "\n");
-    write(root, ".claude-plugin/plugin.json", JSON.stringify({ version: "0.15.0" }, null, 2) + "\n");
+    writeVersions(root, "0.15.0");
     expect(() =>
       runBump({ command: "bump", kind: "patch", dryRun: false, tag: true, release: false, root }),
     ).toThrow(/commit, then pstack bump --tag/);

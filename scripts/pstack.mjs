@@ -37,11 +37,11 @@ pstack bump --tag [--release] [--dry-run] [--root DIR]
 
 SoT is github.com/cursor/plugins (pstack/skills), not backnotprop/pstack or skills.sh.
 Writes into the existing skills/do-* tree. Does not install into agent skill dirs.
-bump writes package.json and .claude-plugin/plugin.json. omp and pi use package.json.
+bump writes package.json, .claude-plugin/plugin.json, and .omp-plugin/plugin.json. omp and pi use package.json.
 Commit those files, then --tag on that HEAD (git tag vX.Y.Z <sha>). --release pushes the tag and gh release create --target <sha>.
 `;
 
-export const VERSION_FILES = Object.freeze(["package.json", ".claude-plugin/plugin.json"]);
+export const VERSION_FILES = Object.freeze(["package.json", ".claude-plugin/plugin.json", ".omp-plugin/plugin.json"]);
 export const BUMP_KINDS = Object.freeze(["patch", "minor", "major"]);
 
 export function parseArgs(argv) {
@@ -362,10 +362,13 @@ function requireCommittedVersions(spawn, root) {
   if (diff.status !== 0) {
     throw new Error("version files are not committed; commit then pstack bump --tag");
   }
-  const pkg = committedVersion(spawn, root, "package.json");
-  const plugin = committedVersion(spawn, root, ".claude-plugin/plugin.json");
-  if (pkg !== plugin) throw new Error(`HEAD versions differ: package.json ${pkg} vs plugin.json ${plugin}`);
-  return pkg;
+  const [pkg, ...rest] = VERSION_FILES.map((rel) => ({ rel, version: committedVersion(spawn, root, rel) }));
+  for (const file of rest) {
+    if (file.version !== pkg.version) {
+      throw new Error(`HEAD versions differ: ${pkg.rel} ${pkg.version} vs ${file.rel} ${file.version}`);
+    }
+  }
+  return pkg.version;
 }
 function peeledTag(spawn, root, tag) {
   const result = spawn("git", ["-C", root, "rev-parse", `${tag}^{commit}`], { encoding: "utf8" });

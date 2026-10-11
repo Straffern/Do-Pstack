@@ -118,7 +118,7 @@ npm run bump -- minor
 npm run bump -- major
 ```
 
-That updates `package.json` (omp plugin + pi extension) and `.claude-plugin/plugin.json` together. Dry-run: `npm run bump -- patch --dry-run`. After those files are committed: `npm run bump -- --tag` (tags HEAD) then `npm run bump -- --release` (push tag + `gh release create --target <sha>`). Do not combine patch and --tag in one run.
+That updates `package.json` (omp plugin + pi extension), `.claude-plugin/plugin.json`, and `.omp-plugin/plugin.json` together. Dry-run: `npm run bump -- patch --dry-run`. After those files are committed: `npm run bump -- --tag` (tags HEAD) then `npm run bump -- --release` (push tag + `gh release create --target <sha>`). Do not combine patch and --tag in one run.
 
 ## License
 

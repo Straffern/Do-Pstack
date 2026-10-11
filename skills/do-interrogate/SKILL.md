@@ -10,26 +10,19 @@ Spawn one reviewer per configured model to adversarially review code changes. Ea
 
 The deliverable is a synthesized verdict. Do NOT auto-apply changes.
 
-## Step 1, Determine Scope
+## Step 1, Scope
 
 Identify what to review from context:
 
-- If the user points at specific files or a diff, use that
-- If on a feature branch, run `git diff main...HEAD` (or the appropriate base branch) for the full changeset
-- If the user's message references recent work, gather the relevant files
+- If the user points at specific files or a diff, use that.
+- If on a feature branch, run `git diff main...HEAD` (or the appropriate base branch) for the full changeset.
+- If the user's message references recent work, gather the relevant files.
 
-Package the diff (or file contents) plus any surrounding context files the reviewers need to understand the code.
+Package the diff or file contents with any surrounding context files the reviewers need to understand the code.
 
-## Step 2, State the Intent
+## Step 2, Intent
 
-Before spawning reviewers, state the intent explicitly. What is this code trying to accomplish? Derive this from:
-
-- The user's message
-- Commit messages
-- PR description if one exists
-- The code itself
-
-Write one clear paragraph. Reviewers challenge whether the work achieves the intent well, not whether the intent itself is correct. If you're unsure about the intent, ask the user before proceeding.
+Before spawning reviewers, state the intent in one clear paragraph from the user's message, commit messages, the PR description if one exists, and the code. If you're unsure about the intent, ask the user before proceeding.
 
 ## Step 3, Spawn Reviewers
 
@@ -37,11 +30,7 @@ Launch all reviewers in one `task` call with one `tasks` entry per seat: `agent:
 
 Each seat runs on its own model; that is the "configured model" per reviewer. Attribute findings by seat, and name the seat's model in the synthesis when you know it.
 
-Read `references/reviewer-prompt.md` and fill in the template with:
-1. The stated intent
-2. The diff or file contents
-3. The review rubric from `references/rubric.md`
-4. The code-quality lens from `references/code-quality-review.md`
+Read `references/reviewer-prompt.md` and fill in the same template for every reviewer with the stated intent, the diff or file contents, the rubric from `references/rubric.md`, and the code-quality lens from `references/code-quality-review.md`.
 
 The same filled template goes to all reviewers, so every model applies the code-quality lens.
 

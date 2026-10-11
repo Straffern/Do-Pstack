@@ -1,6 +1,6 @@
 ---
 name: interrogate-reviewer-a
-description: readonly adversarial reviewer seat A for /interrogate and /how critics.
+description: readonly adversarial reviewer seat A for /interrogate.
 model: "@slow"
 tools: [read, grep, glob]
 ---

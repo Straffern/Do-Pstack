@@ -1,6 +1,6 @@
 ---
 name: interrogate-reviewer-c
-description: readonly adversarial reviewer seat C for /interrogate and /how critics.
+description: readonly adversarial reviewer seat C for /interrogate.
 model: "@pstack_panel_c"
 tools: [read, grep, glob]
 ---

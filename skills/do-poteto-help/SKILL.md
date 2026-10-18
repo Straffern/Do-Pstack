@@ -62,6 +62,8 @@ The default answer is `/poteto-mode`, which runs most of the others when its ste
 | The user wants to | Skill |
 |---|---|
 | Do any non-trivial task with rigor | [`/poteto-mode`](../do-poteto-mode/SKILL.md) |
+| Check that the agent understood their goal and the problem before it starts | [`/in-your-own-words`](../do-in-your-own-words/SKILL.md) |
+| Aim a task higher before starting: more expert, more outcome-focused, not overspecified | [`/sharpen`](../do-sharpen/SKILL.md) |
 | Know how code works now, or where new code should live | [`/how`](../do-how/SKILL.md) |
 | Know why code is shaped this way, or where a number came from | [`/why`](../do-why/SKILL.md) |
 | Understand a change or subsystem, explained plainly | [`/teach`](../do-teach/SKILL.md) |
@@ -80,6 +82,7 @@ The default answer is `/poteto-mode`, which runs most of the others when its ste
 | Hear the last reply again in plain words | [`/bro`](../do-bro/SKILL.md) |
 | Give agents a scripted way to drive the app and prove behavior | [`/create-verification-skill`](../do-create-verification-skill/SKILL.md) |
 | Bring a verification skill and its feature map back in line with the app | [`/maintain-verification-skill`](../do-maintain-verification-skill/SKILL.md) |
+| Formally verify a race, invariant, or other property that tests rarely reach | [`/create-formal-verification-skill`](../do-create-formal-verification-skill/SKILL.md) |
 | Vet a performance number before reporting or acting on it | [`/benchmark-checklist`](../do-benchmark-checklist/SKILL.md) |
 | Run a large or cross-cutting change, or one to review after stepping away | [`/figure-it-out`](../do-figure-it-out/SKILL.md) |
 | Keep a decision log during a run, and review it afterward | [`/show-me-your-work`](../do-show-me-your-work/SKILL.md) |

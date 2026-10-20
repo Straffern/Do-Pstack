@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Explore the codebase to answer "how does X work?" questions. Produce architectural explanations at the level of a senior engineer onboarding onto a subsystem, enough to build a working mental model, not so much that it reads like annotated source code.
 
-Every spawn goes through the `task` tool. Explorers use `agent: "how-explorer"` and every explainer uses `agent: "how-explainer"`. Do not pass `readonly` or `model`.
+Every spawn goes through the `task` tool. Explorers use `agent: "how-explorer"` and every explainer uses `agent: "how-explainer"`. Do not pass `readonly` or `model`. Pick each subagent's reasoning level and fast or standard speed for the job, per the Subagents section of the **poteto-mode** skill.
 
 ## 1. Assess complexity
 

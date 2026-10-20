@@ -22,7 +22,7 @@ That covers the legacy flat (`<id>.jsonl`), current nested (`<id>/<id>.jsonl`), 
 
 ## 2. Spawn three reviewers in parallel
 
-One `task` call with three `tasks` entries: `agent: "reflect-judgment"` for the Judgment and Divergent lenses, `agent: "reflect-tooling"` for the Tooling lens (reviewers need MCP; do not pass `model` or `readonly`). Distinct lens in the task text (Judgment / Tooling / Divergent). The prompt forbids file writes; the parent applies edits.
+One `task` call with three `tasks` entries: `agent: "reflect-judgment"` for the Judgment and Divergent lenses, `agent: "reflect-tooling"` for the Tooling lens (reviewers need MCP; do not pass `model` or `readonly`). Distinct lens in the task text (Judgment / Tooling / Divergent). The prompt forbids file writes; the parent applies edits. Pick each subagent's reasoning level and fast or standard speed for the job, per the Subagents section of the **poteto-mode** skill.
 
 | Lens | Prompt template |
 |---|---|

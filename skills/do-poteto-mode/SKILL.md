@@ -2,13 +2,13 @@
 name: do-poteto-mode
 description: poteto's agent style for concise, detailed responses, deliberate subagents, unslopped prose, simple code, and verified work. Use for poteto, /poteto-mode, or requests to work in this style.
 disable-model-invocation: true
-mode: true
 icon: crown
 color: yellow
-reminder: New task? Playbook match or rigor needed -> apply /poteto-mode. Casual turn or user opts out -> don't.
 ---
 
 # Poteto mode
+
+Bundled skills live at `../do-<name>/SKILL.md` from this file, so put this file's absolute path in every `poteto-agent` prompt.
 
 ## Non-negotiables
 
@@ -44,7 +44,7 @@ Read the leaf skill in full for any principle you apply. Each entry names when i
 - **Laziness Protocol.** Refactoring, sizing a diff, or tempted to add abstractions, layers, or signal threading. Bias to deletion and the smallest change that solves the problem.
 - **Foundational Thinking.** Before writing logic: core types and data structures, scaffold-vs-feature sequencing, what concurrent actors share.
 - **Redesign from First Principles.** Integrating a new requirement into an existing design. Redesign as if it had been foundational from day one.
-- **Attack the Premise.** Two or more fixes that share one premise have failed the same gate. Take a census of which actors hold the imbalance before the next fix, then question the premise instead of writing another fix that assumes it.
+- **Attack the Premise.** Two or more fixes that share one premise have failed the same gate. Write the premise down and test it directly before you write another fix that assumes it.
 - **Subtract Before You Add.** Sequencing an addition, refactor, or rewrite. Remove dead weight first, then build on the simpler base.
 - **Minimize Reader Load.** Reviewing or shaping code that's hard to trace. Count layers and hidden state, collapse one-caller wrappers, shrink mutable scope.
 - **Outcome-Oriented Execution.** Planned rewrites and migrations with explicit phase boundaries. Converge on the target architecture, don't preserve throwaway compatibility states.
@@ -64,9 +64,9 @@ Read the leaf skill in full for any principle you apply. Each entry names when i
 **Verification**
 
 - **Prove It Works.** After a task, before declaring done. Verify against the real artifact, not a proxy or "it compiles".
-- **Fix Root Causes.** Debugging. Trace each symptom to its root cause, reproduce first, ask why until you reach it.
+- **Fix Root Causes.** Debugging. Trace each symptom back to the first place the system went wrong and fix it there. A guard is a fix only when the state it handles is legitimate.
 - **Sequence Work into Verifiable Units** (**principle-sequence-verifiable-units**). Multi-step work (sweeps, migrations, runs of similar edits) and how you stack commits and PRs. Break work into small units that each end in a check, verify each before the next, and order delivery so the sequence proves itself.
-- **Test Behavior, Not Implementation.** Writing, changing, or keeping a test. Call the code the way its users do and assert the result against a literal expected value. If the test would still pass when every imported function returns `undefined`, rewrite the assertion or delete the test.
+- **Test Behavior, Not Implementation.** Writing, changing, or keeping a test. Assert what the code's users can observe, so the test fails when that behavior breaks and keeps passing when only the internals change.
 - **Explain the Number.** Before you trust, report, or act on a number you measured (a speedup, a regression, a throughput, a latency, or an eval result). Find what limits it, and rule out that it measured something other than the work you think.
 
 **Delegation**
@@ -90,7 +90,9 @@ Read the leaf skill in full for any principle you apply. Each entry names when i
 
 ## Subagents
 
-Spawn via omp `task({ context, tasks: [{ agent, task }] })`. Named agents: poteto-agent, comment-sicko, how-explorer, how-explainer, arena-runner-a/b/c, architect-runner-a/b/c, arena-judge, swarm-worker, interrogate-reviewer-a/b/c, bug-fix-worker, feature-worker, perf-issue-worker, hillclimb-worker, refactoring-worker, why-investigator, why-synthesizer, reflect-judgment, reflect-tooling. No `model` field on `task`. Use the playbook's named worker agent for its code-writing delegate, and `agent: "poteto-agent"` for other delegates and ad-hoc helpers. Routed workflow skills (`how`, `why`, `interrogate`, `reflect`, `swarm`, `arena`, `architect`) name their own agents; respect what the skill prescribes, don't override to `poteto-agent`.
+Spawn via omp `task({ context, tasks: [{ agent, task }] })`. Named agents: poteto-agent, comment-sicko, how-explorer, how-explainer, arena-runner-a/b/c, architect-runner-a/b/c, arena-judge, swarm-worker, interrogate-reviewer-a/b/c, bug-fix-worker, feature-worker, perf-issue-worker, hillclimb-worker, refactoring-worker, why-investigator, why-synthesizer, reflect-judgment, reflect-tooling. No `model` field on `task`. Use the playbook's named worker agent for its code-writing delegate, and `agent: "poteto-agent"` for other delegates and ad-hoc helpers. The chat that receives `/poteto-mode` runs the playbook. Never spawn a `poteto-agent` to run the playbook itself. Routed workflow skills (`how`, `why`, `interrogate`, `reflect`, `swarm`, `arena`, `architect`) name their own agents; respect what the skill prescribes, don't override to `poteto-agent`.
+
+**Match the model to the job.** On omp a subagent's model and reasoning level come from the agent you spawn, configured through `/setup-pstack`. `task` calls set no `model`, so pick the level and speed a job needs by picking the agent that fits it.
 
 You own every subagent's work. Review the diff and write your own summary, don't pass through what it said. A second opinion is the same prompt sent to an `interrogate-reviewer-a/b/c` seat whose model family differs from yours. Agreement is high-signal.
 

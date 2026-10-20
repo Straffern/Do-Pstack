@@ -16,7 +16,7 @@ Every candidate gets the same prompt, so the prompt is the contract.
 
 1. State the artifact each candidate is producing.
 2. Derive the rubric, 3-6 concrete gradeable criteria for what success looks like on *this* task. It is the picker's tool in Phase D. Candidates only see the task.
-3. Pick N runners from the seats `arena-runner-a`, `arena-runner-b`, `arena-runner-c`. Each seat runs on its own model, so the default fan-out is all three seats, one candidate each. Model diversity is the point; don't put two candidates on one seat unless the arena covers more design directions than seats. A caller (e.g. **architect**) may name its own runner seats; use those instead.
+3. Pick N runners from the seats `arena-runner-a`, `arena-runner-b`, `arena-runner-c`. Each seat runs on its own model, so the default fan-out is all three seats, one candidate each. Model diversity is the point; don't put two candidates on one seat unless the arena covers more design directions than seats. A caller (e.g. **architect**) may name its own runner seats; use those instead. Pick each subagent's reasoning level and fast or standard speed for the job, per the Subagents section of the **poteto-mode** skill.
 4. Assign output paths. Each candidate writes to its own location (a git worktree where possible, otherwise `/tmp/arena-<slug>/candidate-<n>/`). N candidates writing to the same path is shared mutable state and fails the **separate-before-serializing-shared-state** principle skill test.
 
 ## Phase B: Fan out

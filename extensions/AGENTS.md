@@ -12,6 +12,7 @@ The one omp factory. Sticky `/poteto-mode` for a single conversation.
 
 - Mode is per-session (`pstack-mode` on that session's jsonl / session id). Missing entry means off.
 - Never a process-wide boolean.
+- `before_agent_start` returns the host system prompt plus one appended poteto block: omp passes blocks (append one), Pi passes a string (append text). A returned `systemPrompt` replaces the host prompt, so never drop host blocks.
 - Sticky `/poteto-mode` is factory `registerCommand("poteto-mode")` only. Do not ship `commands/poteto-mode.md`.
 - `package.json` `omp.extensions` points here. Keep legacy `pi.extensions` as the same path list.
 

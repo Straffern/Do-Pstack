@@ -93,7 +93,7 @@ That is the live omp extension command. It stays unprefixed. There is no worktre
 - On omp, enable sends `/skill:do-poteto-mode`. The `/skill:do-poteto-mode` input hook also persists enabled.
 - Stored as a custom `pstack-mode` entry on that conversation’s session jsonl. Last `{enabled}` wins. Missing means off.
 - `session_start` re-reads the jsonl. `new_session` / `/new` starts off. Resume of an on conversation stays on.
-- When on, a prompt needle prepends “Pstack Poteto Mode is on…”
+- When on, a “Pstack Poteto Mode is on…” block is appended after the host system prompt (omp prompt blocks, Pi prompt text). The host prompt stays whole.
 - The TUI status reads `🍠 poteto: ✓ on` when on.
 - Off aliases: `off`, `disable`, `stop`.
 

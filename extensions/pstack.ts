@@ -156,8 +156,10 @@ export default function pstackExtension(pi: any): void {
 
   pi.on("before_agent_start", async (event: any, ctx: any) => {
     if (!isPotetoOn(ctx, modeBySession)) return;
-    const base = typeof event?.systemPrompt === "string" ? event.systemPrompt : "";
-    return { systemPrompt: `${base}\n\n${POTETO_PROMPT}` };
+    // omp passes the base prompt as blocks, Pi as one string. A returned prompt replaces the base, so keep it whole.
+    const base = event?.systemPrompt;
+    if (Array.isArray(base)) return { systemPrompt: [...base, POTETO_PROMPT] };
+    if (typeof base === "string") return { systemPrompt: `${base}\n\n${POTETO_PROMPT}` };
   });
 
   pi.registerCommand("poteto-mode", {

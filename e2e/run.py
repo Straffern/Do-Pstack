@@ -2,8 +2,8 @@
 """Live omp RPC evals for the pstack plugin.
 
 Cases:
-  poteto_on              /poteto-mode injects the needle
-  second_turn_sticky     next turn still has the needle
+  poteto_on              /poteto-mode adds the needle and keeps every host prompt block
+  second_turn_sticky     next turn still has the needle and the host prompt
   poteto_off             /poteto-mode off removes the needle
   new_session_starts_off same-process new_session: new sid, no entry, next turn off
   resume_stays_on        switch_session back to the on-session: needle on
@@ -116,6 +116,13 @@ def has_needle(system_prompt):
     else:
         blob = str(system_prompt or "")
     return NEEDLE in blob
+
+
+def keeps_host(base, system_prompt):
+    """Every block of the pre-mode prompt survives; the mode only appends."""
+    blocks = base if isinstance(base, list) else [base]
+    blob = "\n".join(str(x) for x in system_prompt) if isinstance(system_prompt, list) else str(system_prompt or "")
+    return bool(blocks) and all(str(b) in blob for b in blocks if b)
 
 
 def scan_pstack_mode(path):
@@ -315,8 +322,11 @@ def rpc_suite():
         st_on, _ = get_state(proc, "s_on")
         on_file = st_on.get("sessionFile")
         on_sid = st_on.get("sessionId")
-        on_ok = has_needle(st_on.get("systemPrompt")) and bool(scan_pstack_mode(on_file))
-        results.append(check("poteto_on", on_ok, f"sid={on_sid} needle={has_needle(st_on.get('systemPrompt'))}"))
+        on_host = keeps_host(st.get("systemPrompt"), st_on.get("systemPrompt"))
+        on_ok = has_needle(st_on.get("systemPrompt")) and on_host and bool(scan_pstack_mode(on_file))
+        results.append(
+            check("poteto_on", on_ok, f"sid={on_sid} needle={has_needle(st_on.get('systemPrompt'))} host={on_host}")
+        )
 
         send(proc, {"id": "sticky", "type": "prompt", "message": "Reply with only the word STICKY."})
         wait_prompt_done(proc, "sticky")
@@ -324,7 +334,7 @@ def rpc_suite():
         results.append(
             check(
                 "second_turn_sticky",
-                has_needle(st_st.get("systemPrompt")),
+                has_needle(st_st.get("systemPrompt")) and keeps_host(st.get("systemPrompt"), st_st.get("systemPrompt")),
                 f"sid={st_st.get('sessionId')}",
             )
         )

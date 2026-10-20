@@ -68,9 +68,11 @@ fi
 #   Claude Code: ${CLAUDE_CONFIG_DIR:-~/.claude}/projects/, every non-alnum -> -;
 #                past 200 chars, cut to 200 plus -<hash> (matched here by glob)
 # omp and Pi both honor PI_CODING_AGENT_DIR and nothing in a bucket says which
-# host wrote it, so both rules run under every agent root: the env dir plus the
-# two defaults. Pi's flat PI_CODING_AGENT_SESSION_DIR is searched whole.
-agent_roots=("$HOME/.omp/agent" "$HOME/.pi/agent")
+# host wrote it, so both rules run under every agent root: the env dir, the two
+# defaults, and omp's XDG data dir ($XDG_DATA_HOME/omp, used instead of
+# ~/.omp/agent once it exists). Pi's flat PI_CODING_AGENT_SESSION_DIR is
+# searched whole.
+agent_roots=("$HOME/.omp/agent" "${XDG_DATA_HOME:-$HOME/.local/share}/omp" "$HOME/.pi/agent")
 case "${PI_CODING_AGENT_DIR:-}" in
 "") ;;
 "~" | "~/"*) agent_roots+=("$HOME${PI_CODING_AGENT_DIR#\~}") ;;

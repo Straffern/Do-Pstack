@@ -1,8 +1,8 @@
-import { existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { repoDir, runCiStatic } from "./py-ci.ts";
+import { tempDir } from "./temp-dir.ts";
 
 const SKIP_HREF = /^(https?:|mailto:|javascript:|#)/i;
 
@@ -69,7 +69,7 @@ describe("original product pack", () => {
   const root = repoDir();
 
   it("ci_static.py --product fails when docs/guide, benny, or do-swarm are missing", () => {
-    const empty = mkdtempSync(join(tmpdir(), "pstack-product-"));
+    const empty = tempDir("pstack-product-");
     mkdirSync(join(empty, "docs"), { recursive: true });
     writeFileSync(join(empty, "docs/README.md"), "# hi\n");
     const { status, summary } = runCiStatic(["--product"], empty);

@@ -1,10 +1,10 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { repoDir } from "./py-ci.ts";
+import { tempDir } from "./temp-dir.ts";
 import {
   LOCAL_SUBTRACTIONS,
   UPSTREAM_REPO,
@@ -37,7 +37,7 @@ function writeVersions(root: string, version: string): void {
 }
 
 function gitVersionRepo(version: string): string {
-  const root = mkdtempSync(join(tmpdir(), "pstack-bump-git-"));
+  const root = tempDir("pstack-bump-git-");
   writeVersions(root, version);
   git(root, "init");
   git(root, "config", "user.email", "dev@example.com");
@@ -48,8 +48,8 @@ function gitVersionRepo(version: string): string {
 }
 
 function fixture(): { root: string; from: string } {
-  const root = mkdtempSync(join(tmpdir(), "pstack-sync-pkg-"));
-  const from = mkdtempSync(join(tmpdir(), "pstack-sync-up-"));
+  const root = tempDir("pstack-sync-pkg-");
+  const from = tempDir("pstack-sync-up-");
   write(
     from,
     "how/SKILL.md",
@@ -298,7 +298,7 @@ describe("pstack bump", () => {
   });
 
   it("writes every version manifest together", () => {
-    const root = mkdtempSync(join(tmpdir(), "pstack-bump-"));
+    const root = tempDir("pstack-bump-");
     writeVersions(root, "0.15.0");
     const report = runBump({
       command: "bump",
@@ -315,7 +315,7 @@ describe("pstack bump", () => {
   });
 
   it("does not write package.json when plugin.json is invalid", () => {
-    const root = mkdtempSync(join(tmpdir(), "pstack-bump-bad-plugin-"));
+    const root = tempDir("pstack-bump-bad-plugin-");
     write(root, "package.json", JSON.stringify({ version: "0.15.0" }, null, 2) + "\n");
     write(root, ".claude-plugin/plugin.json", "{not json");
     expect(() =>
@@ -325,7 +325,7 @@ describe("pstack bump", () => {
   });
 
   it("dry-run writes nothing", () => {
-    const root = mkdtempSync(join(tmpdir(), "pstack-bump-dry-"));
+    const root = tempDir("pstack-bump-dry-");
     writeVersions(root, "1.2.3");
     runBump({ command: "bump", kind: "minor", dryRun: true, tag: false, release: false, root });
     expect(JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version).toBe("1.2.3");
@@ -341,7 +341,7 @@ describe("pstack bump", () => {
   });
 
   it("CLI bump patch --dry-run exits 0", () => {
-    const root = mkdtempSync(join(tmpdir(), "pstack-bump-cli-"));
+    const root = tempDir("pstack-bump-cli-");
     writeVersions(root, "0.1.0");
     const result = spawnSync(process.execPath, [cli, "bump", "patch", "--dry-run", "--root", root], {
       encoding: "utf8",
@@ -352,7 +352,7 @@ describe("pstack bump", () => {
   });
 
   it("refuses kind with --tag so it cannot tag old HEAD", () => {
-    const root = mkdtempSync(join(tmpdir(), "pstack-bump-refuse-"));
+    const root = tempDir("pstack-bump-refuse-");
     writeVersions(root, "0.15.0");
     expect(() =>
       runBump({ command: "bump", kind: "patch", dryRun: false, tag: true, release: false, root }),
@@ -375,7 +375,7 @@ describe("pstack bump", () => {
 
   it("release pushes the tag and gh --target HEAD sha", () => {
     const root = gitVersionRepo("0.16.0");
-    const bare = mkdtempSync(join(tmpdir(), "pstack-bump-bare-"));
+    const bare = tempDir("pstack-bump-bare-");
     git(bare, "init", "--bare");
     git(root, "remote", "add", "origin", bare);
     const sha = git(root, "rev-parse", "HEAD").stdout.trim();
@@ -405,7 +405,7 @@ describe("pstack bump", () => {
 
   it("tag then release reuses the existing matching tag", () => {
     const root = gitVersionRepo("0.17.0");
-    const bare = mkdtempSync(join(tmpdir(), "pstack-bump-seq-"));
+    const bare = tempDir("pstack-bump-seq-");
     git(bare, "init", "--bare");
     git(root, "remote", "add", "origin", bare);
     const sha = git(root, "rev-parse", "HEAD").stdout.trim();

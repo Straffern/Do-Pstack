@@ -1,11 +1,11 @@
-import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { runCiStatic } from "./py-ci.ts";
+import { tempDir } from "./temp-dir.ts";
 
 function fixture(files: Record<string, string>): string {
-  const root = mkdtempSync(join(tmpdir(), "pstack-ci-"));
+  const root = tempDir("pstack-ci-");
   for (const [rel, body] of Object.entries(files)) {
     const path = join(root, rel);
     mkdirSync(join(path, ".."), { recursive: true });

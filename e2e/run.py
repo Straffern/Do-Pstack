@@ -293,8 +293,15 @@ def static_install_docs():
     )
 
 def rpc_suite():
-    results = []
     work = Path(tempfile.mkdtemp(prefix="pstack-e2e-"))
+    try:
+        return rpc_checks(work)
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def rpc_checks(work):
+    results = []
     session_dir = work / "sessions"
     session_dir.mkdir()
     linked = plugin_link()

@@ -16,6 +16,7 @@ Prove the plugin without chat-only guesses. Static doctor/lint + Vitest on every
 - CI and local static gate: `python3 e2e/run.py --skip-rpc` and `npm test`.
 - No `omp --mode rpc` on GitHub runners. No `claude` / `omp` install on CI.
 - Do not install or run live omp / the plugin extension as a test harness on CI.
+- Tests remove the temp dirs they create: vitest uses `unit/temp-dir.ts` (`onTestFinished`); `run.py rpc_suite` removes its work dir in `finally`.
 - Live RPC, when omp is present, must `omp plugin link ./` this checkout before starting. Do not pass `-e`. Operator first-run is GitHub marketplace, not clone-and-link.
 - Do not keep a TypeScript copy of `ci_static.py` (no `unit/static-checks.ts`, no homemade brace parser).
 - Do not keep a repo `.omp/skills` symlink. `static_install_docs` and `unit/product-capabilities.test.ts` assert filesystem absence, not only README text.

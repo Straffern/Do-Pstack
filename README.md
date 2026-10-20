@@ -124,5 +124,4 @@ That updates `package.json` (omp plugin + pi extension), `.claude-plugin/plugin.
 
 ## License
 
-I just follow omp's license but i think I need to do that?
-omp is also MIT ([license](https://github.com/can1357/oh-my-pi/blob/main/LICENSE)).
+MIT. See [LICENSE](./LICENSE). pstack itself is MIT, by Lauren Tan. [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) lists which files come from it.

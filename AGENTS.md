@@ -55,6 +55,7 @@ Closeout: re-check paths, update owning docs, refresh indexes, run verification,
 - One factory. Poteto-mode is per-session, never a process-wide boolean.
 - Agent `autoload-skills` must name real skills (`do-*`). omp drops unknown names without a warning. `python3 e2e/ci_static.py --frontmatter` fails on them.
 - Official skills SoT is `cursor/plugins` `pstack/skills`. Update with `npm run sync` (`node scripts/pstack.mjs sync`). Writes into existing `skills/do-*` only. Not `backnotprop/pstack`, not skills.sh, not `npx skills add`. Commit `upstream.lock.json` with the sync. A `conflict:` line is a local adaptation upstream also changed: merge by hand, then `--accept PATH`.
+- Content vendored from `cursor/plugins` `pstack/` is MIT (Lauren Tan). `THIRD_PARTY_NOTICES.md` lists every vendored path and carries that license. Update the list when vendoring a new path.
 - After shipping a feature or official-skills sync, bump with `npm run bump -- patch` (or `minor` / `major`). Writes `package.json` (omp + pi), `.claude-plugin/plugin.json`, and `.omp-plugin/plugin.json`. Commit that, then `npm run bump -- --tag` and `npm run bump -- --release` so the tag hits the committed sha (`gh release create --target`). Do not pass patch and --tag in one command (that would bump twice or tag the old HEAD).
 
 ## Version control

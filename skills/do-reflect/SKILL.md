@@ -12,13 +12,13 @@ Invoke when the user says "reflect" or "/reflect". Skip when the conversation is
 
 ## 1. Locate the active transcript
 
-Before fanning out, find this conversation's transcript in the `agent-transcripts/` directory the system prompt names. Do not glob across `~/.cursor/projects/*/`. That crosses workspace boundaries and reads private chats from unrelated projects.
+Before fanning out, find this conversation's transcript in this workspace's buckets, per the **recall** skill's Where transcripts live section. Never glob across all buckets. That crosses workspace boundaries and reads private chats from unrelated projects.
 
 ```bash
-ls -t <agent-transcripts>/*.jsonl <agent-transcripts>/*/*.jsonl <agent-transcripts>/*/subagents/*.jsonl 2>/dev/null | head -10
+ls -t <bucket>/*.jsonl <bucket>/*/*.jsonl <bucket>/*/subagents/*.jsonl 2>/dev/null | head -10
 ```
 
-That covers the legacy flat (`<id>.jsonl`), current nested (`<id>/<id>.jsonl`), and subagent (`<parent>/subagents/<child>.jsonl`) layouts. For each candidate, read the first JSONL line. Take the file whose `message.content[0].text` contains the conversation's opening user prompt. If none matches, pass a tight digest of the session instead.
+Run it once per bucket. That covers chat files (`<timestamp>_<id>.jsonl` on omp and Pi, `<id>.jsonl` on Claude Code) and subagent transcripts (`<timestamp>_<id>/<agent>.jsonl` on omp and Pi, `<id>/subagents/agent-<id>.jsonl` on Claude Code). The live chat is usually the newest chat file. Confirm with `grep -lF` on a distinctive phrase from the conversation's opening user prompt, one without quotes or line breaks since the JSON escapes those, and take the file that matches. If none matches, pass a tight digest of the session instead.
 
 ## 2. Spawn three reviewers in parallel
 

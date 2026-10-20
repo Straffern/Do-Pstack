@@ -61,15 +61,30 @@ elif raw=$(gh pr list --author "@me" --state all --limit 1000 \
 fi
 [ -s "$prs" ] || echo "[]" > "$prs"
 
-# Transcripts: omp keeps one bucket per cwd under
-# ${PI_CODING_AGENT_DIR:-~/.omp/agent}/sessions/. Each chat is <ts>_<id>.jsonl
-# and its subagent transcripts sit in <ts>_<id>/. bucket mirrors omp's
-# getDefaultSessionDirName: temp → -tmp-<rel>, home → -<rel>, else --<abs>--.
-sessions="${PI_CODING_AGENT_DIR:-$HOME/.omp/agent}/sessions"
+# Transcripts: each host keeps one bucket per cwd. The recall skill's "Where
+# transcripts live" section owns the layouts; this mirrors them.
+#   omp:         <agent>/sessions/, temp -> -tmp-<rel>, home -> -<rel>, else --<abs>--
+#   Pi:          <agent>/sessions/, always --<abs>-- (getDefaultSessionDirPath)
+#   Claude Code: ${CLAUDE_CONFIG_DIR:-~/.claude}/projects/, every non-alnum -> -;
+#                past 200 chars, cut to 200 plus -<hash> (matched here by glob)
+# omp and Pi both honor PI_CODING_AGENT_DIR and nothing in a bucket says which
+# host wrote it, so both rules run under every agent root: the env dir plus the
+# two defaults. Pi's flat PI_CODING_AGENT_SESSION_DIR is searched whole.
+agent_roots=("$HOME/.omp/agent" "$HOME/.pi/agent")
+case "${PI_CODING_AGENT_DIR:-}" in
+"") ;;
+"~" | "~/"*) agent_roots+=("$HOME${PI_CODING_AGENT_DIR#\~}") ;;
+*) agent_roots+=("$PI_CODING_AGENT_DIR") ;;
+esac
+claude_projects="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects"
 home_real=$(cd "$HOME" 2>/dev/null && pwd -P || echo "$HOME")
 tmp_real=$(cd "${TMPDIR:-/tmp}" 2>/dev/null && pwd -P || echo "${TMPDIR:-/tmp}")
-bucket() {
-	local p r
+add_dir() { [ -d "$1" ] && dirs+=("$1"); return 0; }
+# bucket_dirs <path>: append every existing host bucket for <path> to dirs.
+# Claude's encoding is per UTF-16 unit and ours is per byte, so non-ASCII
+# paths can yield a different bucket name; ASCII paths match exactly.
+bucket_dirs() {
+	local p r abs enc d
 	p=$(cd "$1" 2>/dev/null && pwd -P || echo "$1")
 	case "$p" in
 	"$tmp_real") r=-tmp ;;
@@ -78,9 +93,15 @@ bucket() {
 	"$home_real"/*) r=${p#"$home_real"/}; r=-${r//[\/:]/-} ;;
 	*) r=${p#/}; r=--${r//[\/:]/-}-- ;;
 	esac
-	printf '%s/%s' "$sessions" "$r"
+	abs=${p#/}; abs=--${abs//[\/\\:]/-}--
+	for d in "${agent_roots[@]}"; do
+		add_dir "$d/sessions/$r"
+		[ "$abs" = "$r" ] || add_dir "$d/sessions/$abs"
+	done
+	enc=$(printf '%s' "$p" | LC_ALL=C tr -c 'a-zA-Z0-9' '-')
+	if [ ${#enc} -le 200 ]; then add_dir "$claude_projects/$enc"
+	else for d in "$claude_projects/${enc:0:200}"-*; do add_dir "$d"; done; fi
 }
-main_bucket=$(bucket "$main_wt")
 now=$(date +%s)
 
 echo "# base: $base"
@@ -117,11 +138,17 @@ git worktree list --porcelain | awk '/^worktree /{print $2}' | while read -r wt;
 		'.[] | select(.head==$b) | "#\(.number)/\(.state)"' "$prs" 2>/dev/null | head -1)
 	[ -z "$pr" ] && pr="-"
 
-	# Most recent chat that operated in this worktree: one started there (its
-	# own bucket) or a main-worktree chat that touched it. Match path followed
-	# by "/" or a quote so glint-482 does not match glint-482-r37.
+	# Most recent chat that operated in this worktree, from any host: one
+	# started there (its own buckets) or a main-worktree chat that touched it.
+	# Match path followed by "/" or a quote so glint-482 does not match
+	# glint-482-r37. rg sorts by modified time; the newest match wins.
 	last="-"; last_ts=0
-	f=$(rg -l --sortr modified -e "${wt}/" -e "${wt}\"" "$main_bucket" "$(bucket "$wt")" 2>/dev/null | head -1)
+	dirs=()
+	bucket_dirs "$main_wt"
+	bucket_dirs "$wt"
+	[ -n "${PI_CODING_AGENT_SESSION_DIR:-}" ] && add_dir "$PI_CODING_AGENT_SESSION_DIR"
+	f=""
+	[ ${#dirs[@]} -gt 0 ] && f=$(rg -l --sortr modified -e "${wt}/" -e "${wt}\"" "${dirs[@]}" 2>/dev/null | head -1)
 	if [ -n "$f" ]; then last_ts=$(date -r "$f" +%s 2>/dev/null || echo 0)
 		last=$(date -r "$f" '+%Y-%m-%d' 2>/dev/null); fi
 	recent=$([ "$last_ts" -gt 0 ] 2>/dev/null && [ $(( (now - last_ts) / 86400 )) -le 4 ] && echo yes || echo no)

@@ -13,7 +13,7 @@ pstack skill tree. Sibling `skills/` at the package root is what omp auto-discov
 - Skill directories and YAML `name` use the `do-` prefix. After `omp plugin link ./`, the live slash is `/skill:do-<name>`. After Claude plugin install, the live slash is `/pstack:do-<name>`. Do not rename the `do-` set.
 - Every `SKILL.md` has YAML frontmatter with non-empty `name` and `description`.
 - `python3 e2e/ci_static.py --frontmatter` is the gate.
-- Skills and scripts that read chat transcripts use omp's layout `${PI_CODING_AGENT_DIR:-~/.omp/agent}/sessions/<bucket>/`, not `~/.cursor/projects/…/agent-transcripts`. `do-recall` documents the bucket encoding. `do-poteto-mode/scripts/worktree-audit.sh` mirrors it in `bucket()`.
+- Skills and scripts that read chat transcripts cover omp, Pi, and Claude Code. The encodings live in the **recall** skill's Where transcripts live section. `do-poteto-mode/scripts/worktree-audit.sh` mirrors them in `bucket_dirs()`; keep the two in sync.
 
 ## Work Guidance
 

@@ -13,12 +13,13 @@ pstack skill tree. Sibling `skills/` at the package root is what omp auto-discov
 - Skill directories and YAML `name` use the `do-` prefix. After `omp plugin link ./`, the live slash is `/skill:do-<name>`. After Claude plugin install, the live slash is `/pstack:do-<name>`. Do not rename the `do-` set.
 - Every `SKILL.md` has YAML frontmatter with non-empty `name` and `description`.
 - `python3 e2e/ci_static.py --frontmatter` is the gate.
+- Skills and scripts that read chat transcripts use omp's layout `${PI_CODING_AGENT_DIR:-~/.omp/agent}/sessions/<bucket>/`, not `~/.cursor/projects/…/agent-transcripts`. `do-recall` documents the bucket encoding. `do-poteto-mode/scripts/worktree-audit.sh` mirrors it in `bucket()`.
 
 ## Work Guidance
 
 Keep leaf skills operational. Do not add a per-skill AGENTS.md unless a skill becomes its own durable boundary.
 
-Official skill bodies come from `cursor/plugins` `pstack/skills`. Refresh this tree with `npm run sync` (`node scripts/pstack.mjs sync`). That maps `skills/<name>` → `skills/do-<name>` here. Do not add a second skills tree. Do not `npx skills add`.
+Official skill bodies come from `cursor/plugins` `pstack/skills`. Refresh this tree with `npm run sync` (`node scripts/pstack.mjs sync`). That maps `skills/<name>` → `skills/do-<name>` here. Do not add a second skills tree. Do not `npx skills add`. Editing an official file here is fine: `upstream.lock.json` keeps it through later syncs, and sync reports a conflict once upstream changes the same file.
 
 ## Verification
 

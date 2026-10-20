@@ -6,7 +6,7 @@ Cases:
   second_turn_sticky     next turn still has the needle and the host prompt
   poteto_off             /poteto-mode off removes the needle
   new_session_starts_off same-process new_session: new sid, no entry, next turn off
-  resume_stays_on        switch_session back to the on-session: needle on
+  resume_stays_on        switch_session back to the on-session: next turn has the needle and the host prompt
   install_plugin_link    README/AGENTS teach omp marketplace, pi git install, Claude plugin install; competing stories gone
   worktree_cleanup_omp   playbook uses ~/.omp/wt and worktree.base
 
@@ -390,11 +390,17 @@ def rpc_suite():
 
         send(proc, {"id": "sw", "type": "switch_session", "sessionPath": on_file})
         sw, _ = wait_response(proc, "sw", timeout=30)
+        # omp applies before_agent_start prompts per turn; get_state right after the switch shows the base prompt.
+        send(proc, {"id": "resumeturn", "type": "prompt", "message": "Reply with only the word RESUMED."})
+        wait_prompt_done(proc, "resumeturn")
         st_res, _ = get_state(proc, "s_res")
         results.append(
             check(
                 "resume_stays_on",
-                sw.get("success") and has_needle(st_res.get("systemPrompt")),
+                sw.get("success")
+                and st_res.get("sessionId") == on_sid
+                and has_needle(st_res.get("systemPrompt"))
+                and keeps_host(st.get("systemPrompt"), st_res.get("systemPrompt")),
                 f"sid={st_res.get('sessionId')} needle={has_needle(st_res.get('systemPrompt'))}",
             )
         )

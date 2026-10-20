@@ -73,7 +73,7 @@ GitButler (`but`) is the VCS. The main checkout is the `gitbutler/workspace` bra
 Tell operators GitHub marketplace:
 
 - Install host via https://omp.sh/install if needed.
-- `omp plugin marketplace add edheltzel/Do-Pstack` then `omp plugin install pstack@pstack`
+- `omp plugin marketplace add Straffern/Do-Pstack` then `omp plugin install pstack@pstack`
 - This checkout / live RPC: `omp plugin link ./`
 - Later sessions, any cwd: type `/` (`/skill:do-…`, sticky `/poteto-mode`)
 - Do not copy `pstack.ts` into `~/.omp/agent/extensions/`.
@@ -84,7 +84,7 @@ Tell operators GitHub marketplace:
 
 Tell operators git install:
 
-- `pi install git:github.com/edheltzel/Do-Pstack`
+- `pi install git:github.com/Straffern/Do-Pstack`
 - This checkout: `pi install ./`
 - Do not use `pi -e` as the install path.
 
@@ -93,7 +93,7 @@ Tell operators git install:
 Tell operators plugin-first only:
 
 - Manifest: `.claude-plugin/plugin.json`. Catalog: `.claude-plugin/marketplace.json`. Skills stay at plugin-root `skills/`, not inside `.claude-plugin/`.
-- Install: `claude plugin marketplace add <checkout-or-edheltzel/Do-Pstack>` then `claude plugin install pstack@pstack`.
+- Install: `claude plugin marketplace add <checkout-or-Straffern/Do-Pstack>` then `claude plugin install pstack@pstack`.
 - This session only: `claude --plugin-dir ./`
 - Slash skills: `/pstack:do-*`. Do not rename the `do-` skill set.
 - Validate on a host with Claude Code: `claude plugin validate .`

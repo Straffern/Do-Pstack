@@ -14,7 +14,7 @@ We'll use omp for the rest of this guide. Pi and Claude Code load the same plugi
 Run:
 
 ```text
-omp plugin marketplace add edheltzel/Do-Pstack
+omp plugin marketplace add Straffern/Do-Pstack
 omp plugin install pstack@pstack
 ```
 
@@ -69,7 +69,7 @@ On Claude Code, start with `/pstack:do-poteto-mode` instead of the omp factory `
 Pi:
 
 ```text
-pi install git:github.com/edheltzel/Do-Pstack
+pi install git:github.com/Straffern/Do-Pstack
 ```
 
 This checkout: `pi install ./`. List with `pi list`.

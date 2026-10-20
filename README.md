@@ -36,7 +36,7 @@ GitHub install. No clone required.
 ### omp
 
 ```
-omp plugin marketplace add edheltzel/Do-Pstack
+omp plugin marketplace add Straffern/Do-Pstack
 omp plugin install pstack@pstack
 ```
 
@@ -45,7 +45,7 @@ This checkout: `omp plugin link ./`
 ### Pi
 
 ```
-pi install git:github.com/edheltzel/Do-Pstack
+pi install git:github.com/Straffern/Do-Pstack
 ```
 
 This checkout: `pi install ./`
@@ -58,7 +58,7 @@ claude plugin install pstack@pstack
 ```
 
 ```
-claude plugin marketplace add edheltzel/Do-Pstack
+claude plugin marketplace add Straffern/Do-Pstack
 claude plugin install pstack@pstack
 ```
 

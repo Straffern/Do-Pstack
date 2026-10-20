@@ -60,14 +60,16 @@ Closeout: re-check paths, update owning docs, refresh indexes, run verification,
 
 ## Version control
 
-GitButler (`but`) is the VCS. The main checkout is the `gitbutler/workspace` branch; target is `origin/master`.
+jj (colocated with git) is the VCS. Trunk is `master` (`origin/master`). Use `jj` for every version-control operation, never `git` directly. Scripts that shell out to git (`scripts/pstack.mjs`, `worktree-audit.sh`) are fine.
 
-- All writes go through `but` (`commit`, `push`, `pr new`, `move`, `squash`). Read-only git (`git log`, `git blame`) is fine.
-- One dedicated `but` branch per feature. Commit only that session's changes to it.
-- Commit small and often: after every working checkpoint, not at the end of the task. Split unrelated hunks into separate commits. Large commits hide what changed from the human in the loop.
-- Stack when a change clearly builds on an unmerged branch: `but move <child> --above <parent>`. Do not mix dependent work into one branch.
-- Prefer `but` branches in the workspace over git worktrees (GitButler does not commit from linked worktrees). If a worktree is needed for a new feature, suffix it `-wip`.
-- PRs only when asked. Use `but pr new <top-branch> -t`, never `gh pr create`. Write the PR body; when the branch is stacked, name the branches it depends on with a `Stacked on:` line so the reviewer can find them.
+- New work starts in an empty change: `jj new`, then `jj describe -m "<message>"` naming the planned work. Re-describe when the work drifts. Finish with `jj commit -m "<message>"`, which leaves a new empty change on top.
+- Conventional Commits, with a body that says what changed and why.
+- Commit small and often: after every working checkpoint, not at the end of the task. Split unrelated hunks into separate changes (`jj commit <paths>`, `jj split`). Large commits hide what changed from the human in the loop.
+- Stack when a change clearly builds on unmerged work: start it on top (`jj new <parent>`) or move it there (`jj rebase -r <change> -d <parent>`). Do not mix dependent work into one change.
+- One jj workspace per file-editing agent: `ji new <bookmark> -r 'trunk()' -m "<message>"` makes `../Do-Pstack.<bookmark>` and the bookmark. Remove it with `ji close --source Do-Pstack.<bookmark> --method detach --delete-files`, which keeps the commits. Never `jj workspace add` by hand, and never share a workspace between agents: a sibling's operation leaves its working copy stale.
+- Scope destructive revsets (`abandon`, `rebase -s`, `squash`) to your own changes by change id, never `all()` or `visible_heads()`.
+- Push with `jj git push -b <bookmark>`. It tracks a new bookmark itself; do not pass `--allow-new`.
+- PRs only when asked. Push the bookmark, then `gh pr create --head <bookmark>`. Write the PR body; when the change is stacked, name the bookmarks it depends on with a `Stacked on:` line so the reviewer can find them.
 
 ## Native omp
 

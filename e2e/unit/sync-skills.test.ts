@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -97,6 +97,18 @@ function fixture(): { root: string; from: string } {
   return { root, from };
 }
 
+function syncOpts(root: string, from: string, extra: { force?: boolean; accept?: string[] } = {}) {
+  return { command: "sync", dryRun: false, force: false, from, repo: UPSTREAM_REPO, ref: null, root, help: false, accept: [], ...extra };
+}
+
+function kindsOf(report: { plan: { actions: { destRel: string; kind: string }[] } }): Record<string, string> {
+  return Object.fromEntries(report.plan.actions.map((a) => [a.destRel, a.kind]));
+}
+
+function lockFiles(root: string): Record<string, string> {
+  return JSON.parse(readFileSync(join(root, "upstream.lock.json"), "utf8")).files;
+}
+
 describe("pstack sync", () => {
   it("defaults SoT to cursor/plugins, not backnotprop or skills.sh", () => {
     expect(UPSTREAM_REPO).toBe("https://github.com/cursor/plugins.git");
@@ -177,6 +189,81 @@ describe("pstack sync", () => {
       help: false,
     });
     expect(() => readFileSync(join(root, "skills/do-why/SKILL.md"))).toThrow();
+    expect(existsSync(join(root, "upstream.lock.json"))).toBe(false);
+  });
+
+  it("takes upstream where the local file still equals its recorded base and keeps local edits", () => {
+    const { root, from } = fixture();
+    const lever = "skills/do-principle-build-the-lever/SKILL.md";
+    const how = "skills/do-how/SKILL.md";
+    runSync(syncOpts(root, from));
+    expect(lockFiles(root)[lever]).toMatch(/^[0-9a-f]{64}$/);
+    expect(lockFiles(root)[how]).toBeUndefined();
+
+    write(
+      from,
+      "principle-build-the-lever/SKILL.md",
+      "---\nname: principle-build-the-lever\ndescription: Build the script.\n---\n\n# Lever v2\n",
+    );
+    const report = runSync(syncOpts(root, from));
+    expect(kindsOf(report)[lever]).toBe("update");
+    expect(readFileSync(join(root, lever), "utf8")).toContain("# Lever v2");
+    expect(kindsOf(report)[how]).toBe("diverged");
+    expect(readFileSync(join(root, how), "utf8")).toContain("Local omp fork");
+  });
+
+  it("reports a conflict while local and upstream both moved, until --accept records the merge", () => {
+    const { root, from } = fixture();
+    const how = "skills/do-how/SKILL.md";
+    expect(kindsOf(runSync(syncOpts(root, from, { accept: [how] })))[how]).toBe("accept");
+    expect(kindsOf(runSync(syncOpts(root, from)))[how]).toBe("kept");
+
+    write(from, "how/SKILL.md", "---\nname: how\ndescription: Explain code, v2.\n---\n");
+    for (let run = 0; run < 2; run += 1) {
+      const report = runSync(syncOpts(root, from));
+      expect(kindsOf(report)[how]).toBe("conflict");
+      expect(formatReport(report)).toContain(`conflict: ${how}`);
+    }
+    expect(readFileSync(join(root, how), "utf8")).toContain("Local omp fork");
+
+    expect(kindsOf(runSync(syncOpts(root, from, { accept: [how] })))[how]).toBe("accept");
+    expect(kindsOf(runSync(syncOpts(root, from)))[how]).toBe("kept");
+    expect(readFileSync(join(root, how), "utf8")).toContain("Local omp fork");
+
+    expect(kindsOf(runSync(syncOpts(root, from, { force: true })))[how]).toBe("update");
+    expect(readFileSync(join(root, how), "utf8")).toContain("Explain code, v2.");
+  });
+
+  it("refuses --accept for a path that is not an upstream file", () => {
+    const { root, from } = fixture();
+    expect(() => runSync(syncOpts(root, from, { accept: ["skills/do-how/missing.md"] }))).toThrow(
+      /not an upstream file: skills\/do-how\/missing\.md/,
+    );
+  });
+
+  it("reports files upstream deleted, keeps the local copy, and forgets them once it is gone", () => {
+    const { root, from } = fixture();
+    const lever = "skills/do-principle-build-the-lever/SKILL.md";
+    runSync(syncOpts(root, from));
+    rmSync(join(from, "principle-build-the-lever"), { recursive: true });
+    expect(kindsOf(runSync(syncOpts(root, from)))[lever]).toBe("removed");
+    expect(existsSync(join(root, lever))).toBe(true);
+    expect(lockFiles(root)[lever]).toBeDefined();
+
+    rmSync(join(root, "skills/do-principle-build-the-lever"), { recursive: true });
+    runSync(syncOpts(root, from));
+    expect(lockFiles(root)[lever]).toBeUndefined();
+  });
+
+  it("CLI sync --accept records upstream as the base of a local edit", () => {
+    const { root, from } = fixture();
+    const sync = (...args: string[]) =>
+      spawnSync(process.execPath, [cli, "sync", "--from", from, "--root", root, ...args], { encoding: "utf8" });
+    expect(sync().stdout).toContain("diverged: skills/do-how/SKILL.md");
+    const accepted = sync("--accept", "skills/do-how/SKILL.md");
+    expect(accepted.status, accepted.stderr).toBe(0);
+    expect(accepted.stdout).toContain("accepted: skills/do-how/SKILL.md");
+    expect(sync().stdout).toMatch(/summary: .* diverged=1 conflict=0 kept=1 /);
   });
 
   it("package docs name npm run sync and cursor/plugins as SoT", () => {

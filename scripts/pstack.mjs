@@ -2,6 +2,7 @@
 /**
  * Maintainer CLI: vendor official skills (`sync`) and bump package versions (`bump`).
  */
+import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import {
   existsSync,
@@ -30,18 +31,23 @@ Commands:
   sync    Pull official skills from cursor/plugins into skills/do-*
   bump    Bump package.json + Claude plugin version (omp/pi share package.json)
 
-pstack sync [--dry-run] [--force] [--from DIR] [--repo URL] [--ref REF] [--root DIR]
+pstack sync [--dry-run] [--force] [--accept PATH]... [--from DIR] [--repo URL] [--ref REF] [--root DIR]
 
 pstack bump <patch|minor|major> [--dry-run] [--root DIR]
 pstack bump --tag [--release] [--dry-run] [--root DIR]
 
 SoT is github.com/cursor/plugins (pstack/skills), not backnotprop/pstack or skills.sh.
 Writes into the existing skills/do-* tree. Does not install into agent skill dirs.
+upstream.lock.json records the upstream bytes (sha256) each file last matched. A file still equal to
+that base takes the new upstream. Local edits stay. A file whose local copy and upstream both changed
+is a conflict and is not written: merge it by hand, then --accept PATH (as printed, skills/do-…) records
+the current upstream as its base. --force takes upstream for every file.
 bump writes package.json, .claude-plugin/plugin.json, and .omp-plugin/plugin.json. omp and pi use package.json.
 Commit those files, then --tag on that HEAD (git tag vX.Y.Z <sha>). --release pushes the tag and gh release create --target <sha>.
 `;
 
 export const VERSION_FILES = Object.freeze(["package.json", ".claude-plugin/plugin.json", ".omp-plugin/plugin.json"]);
+export const LOCK_FILE = "upstream.lock.json";
 export const BUMP_KINDS = Object.freeze(["patch", "minor", "major"]);
 
 export function parseArgs(argv) {
@@ -59,6 +65,7 @@ export function parseArgs(argv) {
     kind: null,
     tag: false,
     release: false,
+    accept: [],
   };
   for (let i = 0; i < args.length; i += 1) {
     const a = args[i];
@@ -71,6 +78,11 @@ export function parseArgs(argv) {
     else if (a === "--root") opts.root = args[++i];
     else if (a === "--tag") opts.tag = true;
     else if (a === "--release") opts.release = true;
+    else if (a === "--accept") {
+      const path = args[++i];
+      if (!path) throw new Error("--accept needs a path (skills/do-…)");
+      opts.accept.push(path);
+    }
     else if (command === "bump" && BUMP_KINDS.includes(a) && opts.kind == null) opts.kind = a;
     else throw new Error(`unknown option: ${a}`);
   }
@@ -197,18 +209,38 @@ function transformedBytes(relInSkill, raw, slugs, slug) {
   return Buffer.from(rewriteLayout(text, slugs, slug), "utf8");
 }
 
+export function sha256(bytes) {
+  return createHash("sha256").update(bytes).digest("hex");
+}
+
+/** `files` maps each skills/do-* path to the sha256 of the upstream bytes it last matched. */
+export function readLock(root) {
+  const path = join(root, LOCK_FILE);
+  if (!existsSync(path)) return { files: {} };
+  const lock = JSON.parse(readFileSync(path, "utf8"));
+  return { ...lock, files: lock.files ?? {} };
+}
+
+function writeLock(root, lock) {
+  const files = Object.fromEntries(Object.entries(lock.files).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));
+  writeFileSync(join(root, LOCK_FILE), `${JSON.stringify({ ...lock, files }, null, 2)}\n`);
+}
+
 export function planSync(args) {
   const upstreamSkills = args.upstreamSkills;
   const destSkills = args.destSkills;
   const force = Boolean(args.force);
+  const base = args.base ?? {};
+  const accept = new Set(args.accept ?? []);
   const slugs = listSkillSlugs(upstreamSkills);
   if (!slugs.length) throw new Error(`no SKILL.md trees under ${upstreamSkills}`);
   const subtraction = new Set(LOCAL_SUBTRACTIONS);
-  /** @type {{kind: string, destRel: string, src: string, bytes?: Buffer}[]} */
+  /** @type {{kind: string, destRel: string, src?: string, bytes?: Buffer}[]} */
   const actions = [];
+  /** Next lock: the upstream bytes each local file now matches. */
+  const files = {};
+  const seen = new Set();
   let unchanged = 0;
-  let diverged = 0;
-  let skipped = 0;
 
   for (const slug of slugs) {
     const srcRoot = join(upstreamSkills, slug);
@@ -216,34 +248,41 @@ export function planSync(args) {
     for (const rel of walkFiles(srcRoot)) {
       const upRel = `${slug}/${rel}`;
       const destRel = `skills/do-${slug}/${rel}`;
+      seen.add(destRel);
       if (subtraction.has(upRel)) {
         actions.push({ kind: "skip", destRel, src: upRel });
-        skipped += 1;
         continue;
       }
-      const srcPath = join(srcRoot, rel);
-      const raw = readFileSync(srcPath);
-      const bytes = transformedBytes(rel, raw, slugs, slug);
+      const bytes = transformedBytes(rel, readFileSync(join(srcRoot, rel)), slugs, slug);
+      const upstream = sha256(bytes);
+      const recorded = base[destRel];
       const destPath = join(destRoot, rel);
-      if (!existsSync(destPath)) {
-        actions.push({ kind: "add", destRel, src: upRel, bytes });
-        continue;
-      }
-      const current = readFileSync(destPath);
-      if (current.equals(bytes)) {
-        unchanged += 1;
-        continue;
-      }
-      if (force) {
-        actions.push({ kind: "update", destRel, src: upRel, bytes });
-        continue;
-      }
-      actions.push({ kind: "diverged", destRel, src: upRel });
-      diverged += 1;
+      const current = existsSync(destPath) ? readFileSync(destPath) : null;
+      let kind;
+      if (!current) kind = "add";
+      else if (current.equals(bytes)) kind = "unchanged";
+      else if (force || sha256(current) === recorded) kind = "update";
+      else if (accept.has(destRel)) kind = "accept";
+      else if (recorded === upstream) kind = "kept";
+      else kind = recorded ? "conflict" : "diverged";
+
+      if (kind === "unchanged") unchanged += 1;
+      else actions.push({ kind, destRel, src: upRel, ...(kind === "add" || kind === "update" ? { bytes } : {}) });
+      // A conflict keeps its old base so it reports until merged and accepted. A diverged file has none yet.
+      if (kind === "conflict") files[destRel] = recorded;
+      else if (kind !== "diverged") files[destRel] = upstream;
     }
   }
 
-  return { slugs, actions, unchanged, diverged, skipped };
+  for (const [destRel, recorded] of Object.entries(base)) {
+    if (seen.has(destRel) || !existsSync(join(destSkills, destRel.slice("skills/".length)))) continue;
+    actions.push({ kind: "removed", destRel });
+    files[destRel] = recorded;
+  }
+  const unknown = [...accept].filter((path) => !seen.has(path));
+  if (unknown.length) throw new Error(`--accept: not an upstream file: ${unknown.join(", ")}`);
+
+  return { slugs, actions, unchanged, files };
 }
 
 export function applyPlan(root, plan) {
@@ -265,19 +304,27 @@ export function formatReport(info) {
   ];
   if (info.version) lines.push(`upstream-version: ${info.version}`);
   if (info.dryRun) lines.push("mode: dry-run");
-  const added = info.plan.actions.filter((a) => a.kind === "add");
-  const updated = info.plan.actions.filter((a) => a.kind === "update");
-  const skipped = info.plan.actions.filter((a) => a.kind === "skip");
-  const diverged = info.plan.actions.filter((a) => a.kind === "diverged");
-  for (const a of added) lines.push(`added: ${a.destRel}`);
-  for (const a of updated) lines.push(`updated: ${a.destRel}`);
-  for (const a of skipped) lines.push(`skipped: ${a.destRel} (local subtraction)`);
-  const divergedSkills = [...new Set(diverged.map((a) => a.destRel.split("/").slice(0, 2).join("/")))].sort();
-  if (divergedSkills.length) {
-    lines.push(`diverged-kept-local: ${divergedSkills.join(" ")}`);
+  const count = {};
+  const labels = {
+    add: "added",
+    update: "updated",
+    accept: "accepted",
+    skip: "skipped",
+    conflict: "conflict",
+    diverged: "diverged",
+    removed: "removed-upstream",
+  };
+  for (const a of info.plan.actions) {
+    count[a.kind] = (count[a.kind] ?? 0) + 1;
+    if (a.kind === "skip") lines.push(`skipped: ${a.destRel} (local subtraction)`);
+    else if (labels[a.kind]) lines.push(`${labels[a.kind]}: ${a.destRel}`);
   }
+  if (count.conflict) lines.push("next: merge each conflict by hand (local and upstream both changed), then --accept PATH");
+  if (count.diverged) lines.push("next: diverged files have no recorded base; --accept PATH keeps local, --force takes upstream");
+  if (count.removed) lines.push("next: upstream deleted each removed-upstream file; delete the local copy if it is not an adaptation");
+  const n = (kind) => count[kind] ?? 0;
   lines.push(
-    `summary: added=${added.length} updated=${updated.length} skipped=${skipped.length} diverged=${diverged.length} unchanged=${info.plan.unchanged}`,
+    `summary: added=${n("add")} updated=${n("update")} skipped=${n("skip")} diverged=${n("diverged")} conflict=${n("conflict")} kept=${n("kept")} accepted=${n("accept")} removed=${n("removed")} unchanged=${info.plan.unchanged}`,
   );
   return lines.join("\n");
 }
@@ -305,8 +352,13 @@ export function runSync(opts) {
       upstreamSkills: fetched.skillsDir,
       destSkills,
       force: opts.force,
+      base: readLock(root).files,
+      accept: opts.accept,
     });
-    if (!opts.dryRun) applyPlan(root, plan);
+    if (!opts.dryRun) {
+      applyPlan(root, plan);
+      writeLock(root, { version: fetched.version, commit: fetched.sha, files: plan.files });
+    }
     return {
       repo: fetched.repo,
       sha: fetched.sha,

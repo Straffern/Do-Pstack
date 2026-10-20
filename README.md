@@ -110,6 +110,8 @@ Dry-run: `npm run sync -- --dry-run`.
 
 That pulls `pstack/skills/<name>` from `cursor/plugins` into the existing `skills/do-*` tree (YAML `name` gets the `do-` prefix). It does not create a second skill tree or install into agent skill directories.
 
+`upstream.lock.json` records which upstream bytes each file last matched. A file you never edited takes the new upstream. Your edits stay. A file where both sides changed is reported as `conflict:` and is not written. Merge it by hand, then `npm run sync -- --accept skills/do-<name>/<file>`. `--force` takes upstream everywhere.
+
 After a feature or this sync, bump versions the same way:
 
 ```

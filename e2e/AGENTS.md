@@ -7,7 +7,7 @@ Prove the plugin without chat-only guesses. Static doctor/lint + Vitest on every
 ## Ownership
 
 - `run.py` — live RPC evals; `--skip-rpc` is static-only
-- `ci_static.py` — doctor, frontmatter, size, product pack, Claude plugin layout, packaging scratch
+- `ci_static.py` — doctor, frontmatter (incl. agent `autoload-skills` naming real skills), size, product pack, Claude plugin layout, packaging scratch
 - `unit/` — Vitest helpers and tests
 - `ci-shims/` — `node:fs` stub for `tsc` without `@types/node`
 

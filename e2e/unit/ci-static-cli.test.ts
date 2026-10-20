@@ -32,6 +32,18 @@ describe("ci_static.py CLI fixtures", () => {
     expect(summary.failed).toContain("skills/x/SKILL.md");
   });
 
+  it("fails frontmatter when an agent autoloads a skill name that does not exist", () => {
+    const root = fixture({
+      "skills/do-x/SKILL.md": "---\nname: do-x\ndescription: d\n---\n",
+      "agents/block.md": "---\nname: block\ndescription: d\nautoload-skills:\n  - do-x\n---\n",
+      "agents/flow.md": "---\nname: flow\ndescription: d\nautoloadSkills: [do-x]\n---\n",
+      "agents/stale.md": '---\nname: stale\ndescription: d\nautoload-skills:\n  - x\nmodel: "@task"\n---\n',
+    });
+    const { status, summary } = runCiStatic(["--frontmatter"], root);
+    expect(status).toBe(1);
+    expect(summary.failed).toEqual(["agents/stale.md:autoload"]);
+  });
+
   it("fails quality when the factory is over the size budget", () => {
     const root = fixture({
       "package.json": JSON.stringify({ omp: { extensions: ["./extensions/pstack.ts"] } }),

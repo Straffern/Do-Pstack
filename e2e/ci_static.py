@@ -51,6 +51,33 @@ def frontmatter_fields(text: str) -> dict[str, str] | None:
     return fields
 
 
+AUTOLOAD_KEYS = ("autoload-skills", "autoloadSkills")
+
+
+def autoload_skills(text: str) -> list[str]:
+    """Skill names an agent preloads: a block list, `[a, b]`, or CSV under either key spelling (omp camelCases kebab keys)."""
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return []
+    end = next((i for i, line in enumerate(lines[1:], 1) if line.strip() == "---"), None)
+    if end is None:
+        return []
+    body = lines[1:end]
+    names: list[str] = []
+    for i, line in enumerate(body):
+        key, sep, raw = line.partition(":")
+        if not sep or line[:1].isspace() or key.strip() not in AUTOLOAD_KEYS:
+            continue
+        if raw.strip():
+            names.extend(raw.strip().strip("[]").split(","))
+            continue
+        for item in body[i + 1 :]:
+            if not item.strip().startswith("-"):
+                break
+            names.append(item.strip()[1:])
+    return [n.strip().strip("'\"") for n in names if n.strip().strip("'\"")]
+
+
 def quality(root: Path | None = None) -> list[dict]:
     root = ROOT if root is None else Path(root)
     results = []
@@ -310,6 +337,7 @@ def frontmatter(root: Path | None = None) -> list[dict]:
     results = []
     skills = sorted(root.glob("skills/**/SKILL.md"))
     results.append(check("skill_files", bool(skills), f"{len(skills)} SKILL.md"))
+    skill_names: set[str] = set()
     for path in skills:
         rel = path.relative_to(root).as_posix()
         fields = frontmatter_fields(path.read_text(encoding="utf-8"))
@@ -318,9 +346,19 @@ def frontmatter(root: Path | None = None) -> list[dict]:
             continue
         name = (fields.get("name") or "").strip()
         desc = (fields.get("description") or "").strip()
+        skill_names.add(name)
         ok = bool(name) and bool(desc)
         missing = [k for k, v in (("name", name), ("description", desc)) if not v]
         results.append(check(rel, ok, "name + description" if ok else f"missing {', '.join(missing)}"))
+
+    agents_dir = root / "agents"
+    for path in sorted(agents_dir.glob("*.md")) if agents_dir.is_dir() else []:
+        wanted = autoload_skills(path.read_text(encoding="utf-8"))
+        if not wanted:
+            continue
+        unknown = [n for n in wanted if n not in skill_names]
+        detail = f"unknown skill {', '.join(unknown)}" if unknown else f"autoloads {', '.join(wanted)}"
+        results.append(check(f"{path.relative_to(root).as_posix()}:autoload", not unknown, detail))
 
     commands_dir = root / "commands"
     commands = sorted(commands_dir.glob("*.md")) if commands_dir.is_dir() else []

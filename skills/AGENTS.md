@@ -15,6 +15,7 @@ pstack skill tree. Sibling `skills/` at the package root is what omp auto-discov
 - `python3 e2e/ci_static.py --frontmatter` is the gate.
 - Skills and scripts that read chat transcripts cover omp, Pi, and Claude Code. The encodings live in the **recall** skill's Where transcripts live section. `do-poteto-mode/scripts/worktree-audit.sh` mirrors them in `bucket_dirs()`; keep the two in sync.
 - Keep upstream's per-spawn sentence "Pick each subagent's reasoning level and fast or standard speed for the job, per the Subagents section…" verbatim wherever upstream has it. On omp the **poteto-mode** skill's Subagents section defines it: the agent you spawn sets the model and reasoning level, and `task` sets no `model`. Do not port upstream's model slugs, effort steps, or `-fast` choices; per-spawn model choice changes agent model config, which needs the user's approval.
+- Upstream text is written for Cursor. Map Cursor-only tools to omp when merging: `AskQuestion` → `ask`; Cursor's `/loop` → omp's built-in `/loop`; `/deslop` → a deslop pass over the diff; `control-ui` / `control-cli` → the repo's own driver or verify skill, else the Eval `browser` prelude or `bash` with a PTY; `create-skill` → a skill-authoring skill when one is installed, else the SKILL.md written with omp frontmatter; cloud agents → local `task` subagents (`isolated: true` for a separate workspace). Leave attribution and harmless Cursor mentions alone.
 
 ## Work Guidance
 

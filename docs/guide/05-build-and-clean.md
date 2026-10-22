@@ -48,7 +48,7 @@ In context, that's enough. [`/tdd`](../../skills/do-tdd/SKILL.md) writes the sma
 
 ## Clean before you commit
 
-The [Opening a PR playbook](../../skills/do-poteto-mode/playbooks/opening-a-pr.md) runs `/deslop` on the diff before each commit and applies [`/unslop`](../../skills/do-unslop/SKILL.md) to the PR description and commit bodies. `/deslop` ships in the `cursor-team-kit` plugin, not in pstack. If you don't have it, ask for the same outcome in plain words: remove narrating comments, unsupported guards, dead compatibility paths, and unrelated edits.
+The [Opening a PR playbook](../../skills/do-poteto-mode/playbooks/opening-a-pr.md) deslops the diff before each commit and applies [`/unslop`](../../skills/do-unslop/SKILL.md) to the PR description and commit bodies. The deslop pass removes narrating comments, unsupported guards, dead compatibility paths, and unrelated edits. In Cursor that pass is `/deslop` from the `cursor-team-kit` plugin. omp has no `/deslop`, so the playbook does the pass itself, and you can ask for it in plain words.
 
 For prose, `/unslop` takes a target and any extra rules you have:
 
@@ -68,7 +68,7 @@ Comments need their own pass, and not from the agent that wrote them. An author 
 
 [`/no-comments`](../../skills/do-no-comments/SKILL.md) spawns [Comment Sicko](../../agents/comment-sicko.md), a read-only reviewer with a short keep list: license headers, doc comments on a public API, links that explain what code can't, behavior forced by an external dependency you can't reshape. Everything else goes. A surprise in your own code gets no such pass. The comment comes back as a refactor flag, and `/no-comments` fixes the flags it accepts at the root cause. When a comment claims a constraint, "do not remove", the skill offers to encode the claim as a type, test, or lint. Either way, the comment comes out.
 
-Keep the split straight. `/deslop` cleans slop out of the code. `/unslop` cleans it out of prose. `/no-comments` hands the comments to a reviewer who didn't write them.
+Keep the split straight. The deslop pass cleans slop out of the code. `/unslop` cleans it out of prose. `/no-comments` hands the comments to a reviewer who didn't write them.
 
 Cleanup is not optional polish. A diff with narrating comments and defensive dead weight reads as unfinished to reviewers, and the extra code is where the next bug hides. If the diff feels padded, say `deslop it` before you commit, not after review calls it out.
 

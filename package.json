@@ -1,6 +1,6 @@
 {
   "name": "pstack",
-  "version": "0.17.6",
+  "version": "0.17.7",
   "description": "pstack plugin for omp/Pi and Claude Code: sticky /poteto-mode, skills, agents.",
   "private": true,
   "type": "module",

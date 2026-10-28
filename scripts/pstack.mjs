@@ -12,6 +12,7 @@ import {
   readFileSync,
   rmSync,
   statSync,
+  chmodSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -235,7 +236,7 @@ export function planSync(args) {
   const slugs = listSkillSlugs(upstreamSkills);
   if (!slugs.length) throw new Error(`no SKILL.md trees under ${upstreamSkills}`);
   const subtraction = new Set(LOCAL_SUBTRACTIONS);
-  /** @type {{kind: string, destRel: string, src?: string, bytes?: Buffer}[]} */
+  /** @type {{kind: string, destRel: string, src?: string, bytes?: Buffer, mode?: number}[]} */
   const actions = [];
   /** Next lock: the upstream bytes each local file now matches. */
   const files = {};
@@ -254,20 +255,21 @@ export function planSync(args) {
         continue;
       }
       const bytes = transformedBytes(rel, readFileSync(join(srcRoot, rel)), slugs, slug);
+      const mode = statSync(join(srcRoot, rel)).mode & 0o777;
       const upstream = sha256(bytes);
       const recorded = base[destRel];
       const destPath = join(destRoot, rel);
       const current = existsSync(destPath) ? readFileSync(destPath) : null;
       let kind;
       if (!current) kind = "add";
-      else if (current.equals(bytes)) kind = "unchanged";
+      else if (current.equals(bytes)) kind = (statSync(destPath).mode & 0o777) === mode ? "unchanged" : "update";
       else if (force || sha256(current) === recorded) kind = "update";
       else if (accept.has(destRel)) kind = "accept";
       else if (recorded === upstream) kind = "kept";
       else kind = recorded ? "conflict" : "diverged";
 
       if (kind === "unchanged") unchanged += 1;
-      else actions.push({ kind, destRel, src: upRel, ...(kind === "add" || kind === "update" ? { bytes } : {}) });
+      else actions.push({ kind, destRel, src: upRel, ...(kind === "add" || kind === "update" ? { bytes, mode } : {}) });
       // A conflict keeps its old base so it reports until merged and accepted. A diverged file has none yet.
       if (kind === "conflict") files[destRel] = recorded;
       else if (kind !== "diverged") files[destRel] = upstream;
@@ -292,6 +294,7 @@ export function applyPlan(root, plan) {
     const path = join(root, action.destRel);
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(path, action.bytes);
+    if (action.mode != null) chmodSync(path, action.mode);
     written.push(action.destRel);
   }
   return written;

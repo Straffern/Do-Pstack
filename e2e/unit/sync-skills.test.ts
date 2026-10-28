@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -210,6 +210,19 @@ describe("pstack sync", () => {
     expect(readFileSync(join(root, lever), "utf8")).toContain("# Lever v2");
     expect(kindsOf(report)[how]).toBe("diverged");
     expect(readFileSync(join(root, how), "utf8")).toContain("Local omp fork");
+  });
+
+  it("carries the upstream executable bit onto added and byte-equal files", () => {
+    const { root, from } = fixture();
+    const script = "skills/do-poteto-mode/scripts/run.sh";
+    write(from, "poteto-mode/scripts/run.sh", "#!/bin/sh\n");
+    chmodSync(join(from, "poteto-mode/scripts/run.sh"), 0o755);
+    runSync(syncOpts(root, from));
+    expect(statSync(join(root, script)).mode & 0o777).toBe(0o755);
+
+    chmodSync(join(root, script), 0o644);
+    expect(kindsOf(runSync(syncOpts(root, from)))[script]).toBe("update");
+    expect(statSync(join(root, script)).mode & 0o777).toBe(0o755);
   });
 
   it("reports a conflict while local and upstream both moved, until --accept records the merge", () => {

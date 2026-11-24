@@ -40,7 +40,7 @@ You should see each plugin agent and the `@role` it uses. Routing lives in `/mod
 
 To change a concrete model for a role, open `/model` then Roles. To put one agent on a different role, open `/agents` and override that agent. New `task` calls pick it up.
 
-Most agents use built-in roles (`smol`, `default`, `task`, `slow`, `advisor`). Panels (`/arena`, `/architect`, `/interrogate`, `/how` critics) run seat A on `slow` and seats B/C on two custom roles, `pstack_panel_b` and `pstack_panel_c`; the arena judge uses `advisor`. Set both custom roles under `modelRoles` on different model families. An unset one falls back to the session model, and the panel loses its model diversity.
+Most agents use built-in roles (`smol`, `default`, `task`, `slow`, `advisor`). Panels (`/arena`, `/interrogate`, and `/architect` when it runs `/arena`) run seat A on `slow` and seats B/C on two custom roles, `pstack_panel_b` and `pstack_panel_c`; the arena judge uses `advisor`. Set both custom roles under `modelRoles` on different model families. An unset one falls back to the session model, and the panel loses its model diversity.
 
 On Claude Code the same skill is [`/pstack:do-setup-pstack`](../../skills/do-setup-pstack/SKILL.md).
 
@@ -58,7 +58,7 @@ Pick something real but small. Describe it the way you'd describe it to a collea
 /poteto-mode add a --json flag to this command. text output stays byte-identical. verify both.
 ```
 
-You should see a todo list. The first item is "read the Principles section." The rest are Feature playbook steps. If `/poteto-mode` skips a step, the step stays in the list with `skip: <reason>`.
+You should see a todo list. Its first items are the matched playbook's steps copied in, the Feature playbook for this prompt.
 
 Type normal follow-ups after that. On omp, `/poteto-mode` stays on for this conversation until you turn it off.
 

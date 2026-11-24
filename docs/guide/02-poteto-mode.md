@@ -25,7 +25,7 @@ flowchart TD
     J --> K
 ```
 
-The diagram shows the common routes. There are also playbooks for hillclimbing a metric, diagnosing runtime symptoms and captured traces, prototypes, visual parity, authoring and evaluating skills, autonomous runs, babysitting a PR or stack to merge-ready, shipping a verified stack, running a PR queue on autopilot, orchestrating project-scale programs, session pickup, pausing safely, multi-phase plans, and worktree cleanup. The [playbook directory](../../skills/do-poteto-mode/playbooks/) has the full set.
+The diagram shows the common routes. There are also playbooks for hillclimbing a metric, diagnosing runtime symptoms and captured traces, prototypes, visual parity, authoring and evaluating skills, autonomous runs, babysitting a PR or stack to merge-ready, shipping a verified stack, running a PR queue on autopilot, session pickup, pausing safely, multi-phase plans, and worktree cleanup. The [playbook directory](../../skills/do-poteto-mode/playbooks/) has the full set.
 
 ## Say the goal, not the steps
 
@@ -35,7 +35,7 @@ You don't write a spec. You say what's wrong or what you want, plus anything you
 /poteto-mode users get two notifications after a retry. repro first, then fix and verify.
 ```
 
-You should see the Bug fix steps in the todo list. "repro first" is a constraint, not politeness. A skipped step stays visible with `skip: <reason>`.
+You should see the Bug fix steps in the todo list. "repro first" is a constraint, not politeness.
 
 When the conversation already carries the context, these are enough:
 
@@ -91,7 +91,7 @@ When you step away, say what done means and go:
 
 Work you'll review later routes through [`/figure-it-out`](../../skills/do-figure-it-out/SKILL.md), which designs the run's phases and keeps a [`/show-me-your-work`](../../skills/do-show-me-your-work/SKILL.md) decision log. [Run work while you sleep](./07-overnight.md) covers the overnight contract.
 
-Don't list skills in your prompt ("use /how, then /architect, then /arena..."). The playbook already sequences them. A hand-written sequence usually reorders or drops steps. Name a skill only when you want to override a specific choice.
+Don't list skills in your prompt ("use /architect, then /arena, then /interrogate..."). The playbook already sequences them. A hand-written sequence usually reorders or drops steps. Name a skill only when you want to override a specific choice.
 
 Read [`poteto-mode`](../../skills/do-poteto-mode/SKILL.md) itself for the full routing rules.
 
